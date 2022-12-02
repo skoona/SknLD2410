@@ -5,6 +5,82 @@
  * 
  */
 
+/*
+{ 
+"t":"LD2410 Sensor", 
+"g":[ 
+      { "t":"Moving Target", 
+          "d":[ 
+                  { "t":"Moving", "v":"%2", "g":true, "u":"cm" },
+                  { "t":"Detection", "v":"%2", "g":true, "u":"cm" },
+                  { "t":"Energy", "v":"%2", "g":true },
+              ] 
+      },
+      { "t":"Stationary Target", 
+          "d":[ 
+                  { "t":"Stationary", "v":"%2", "g":true, "u":"cm" },
+                  { "t":"Detection", "v":"%2", "g":true, "u":"cm" },
+                  { "t":"Energy", "v":"%2", "g":true },
+              ] 
+      },
+      { "t":"Gate 0", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 1", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 2", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 3", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 4", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 5", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 6", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 7", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      },
+      { "t":"Gate 8", 
+          "d":[ 
+                  { "t":"Movement Energy", "v":"%2", "g":true },
+                  { "t":"Static Energy", "v":"%2", "g":true }
+              ] 
+      }
+    ] 
+}
+*/
+
 #include <ld2410.h>
 
 #define RXD2 16 // 8
@@ -13,8 +89,11 @@
 ld2410 radar;
 
 uint32_t lastReading = 0;
-
-uint32_t doEngineering = 0;
+uint32_t pos = 0;
+uint32_t pos1 = 0;
+uint32_t pos2 = 0;
+char buffer1[512];
+char serialBuffer[4096];
 
 void setup(void)
 {
@@ -29,7 +108,7 @@ void setup(void)
   {
     Serial.println(F("OK "));
     delay(0);
-    doEngineering=millis() + 60000;
+    radar.requestStartEngineeringMode();
   }
   else
   {
@@ -40,40 +119,26 @@ void setup(void)
 void loop()
 {
   radar.ld2410_loop();
-  if(millis() == doEngineering) {
-    radar.requestStartEngineeringMode();
-  }
+
   if(radar.isConnected() && millis() - lastReading > 2000)  //Report every 1000ms
   {
     lastReading = millis();
     if(radar.presenceDetected())
     {
-      if(radar.isStationary())
-      {
-        Serial.printf("Stationary target: %03dcm  energy: %03d  Detection distance: %03dcm\n", radar.stationaryTargetDistance(), radar.stationaryTargetEnergy(), radar.detectionDistance());
-        if(radar.isEngineeringMode()){
-          Serial.printf("Moving Gate:%d, Static Gate:%d\n",radar.engMaxMovingDistanceGate(), radar.engMaxStaticDistanceGate());
-          for(int x = 0; x < LD2410_MAX_GATES; ++x) {
-            Serial.printf("Gate:%d, Movement Energy: %03d, Static Energy:%03d\n", x, radar.engMovingDistanceGateEnergy(x), radar.engStaticDistanceGateEnergy(x));
-          }
-          Serial.println("");
-        }
+      // pos = snprintf(serialBuffer,sizeof(serialBuffer),"{\"t\":\"LD2410 Sensor\",\"g\":[{\"t\":\"Moving Target\",\"d\":[{\"t\":\"Moving\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true }]},{\"t\":\"Stationary Target\",\"d\":[{\"t\":\"Stationary\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true}]}],\"g\":[",
+      pos = snprintf(serialBuffer,sizeof(serialBuffer),"{\"t\":\"LD2410 Sensor\",\"g\":[{\"t\":\"Moving Target\",\"d\":[{\"t\":\"Moving\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true }]},{\"t\":\"Stationary Target\",\"d\":[{\"t\":\"Stationary\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true}]},",
+        radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
+
+      for(int x = 0; x < LD2410_MAX_GATES; ++x) {
+        pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Gate %d\",\"d\":[{\"t\":\"Movement Energy\",\"v\":%d,\"g\":true},{\"t\":\"Static Energy\",\"v\":%d,\"g\":true}]},", 
+                  x, radar.engMovingDistanceGateEnergy(x), radar.engStaticDistanceGateEnergy(x));  
+        strcat(serialBuffer, buffer1);
+        pos += pos1;
       }
-      if(radar.isMoving())
-      {
-        Serial.printf("Moving target: %03dcm  energy: %03d  Detection distance: %03dcm\n", radar.movingTargetDistance(), radar.movingTargetEnergy(), radar.detectionDistance());
-        if(radar.isEngineeringMode()){
-          Serial.printf("Moving Gate:%d, Static Gate:%d\n",radar.engMaxMovingDistanceGate(), radar.engMaxStaticDistanceGate());
-          for(int x = 0; x < LD2410_MAX_GATES; ++x) {
-            Serial.printf("Gate:%d, Movement Energy: %03d, Static Energy:%03d\n", x, radar.engMovingDistanceGateEnergy(x), radar.engStaticDistanceGateEnergy(x));
-          }
-        }
-        Serial.println("");
-      }
-    }
-    else
-    {
-      Serial.println(F("No target"));
+      serialBuffer[--pos] = 0;
+      strcat(serialBuffer, "]}\n");
+
+      Serial.print(serialBuffer);
     }
   }
 }
