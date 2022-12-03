@@ -17,3 +17,7 @@ app "SerialStudio" at this link:
 
 - https://github.com/Serial-Studio/Serial-Studio/releases
 - https://www.dobitaobyte.com.br/laboratorio-maker-05-serial-studio-monitor-serial-de-tempo-real/
+
+### Both are maps to process csv data: use via SerialStudio Setup option
+    ld2410-alarm.json      buildWithAlarmSerialStudioCSV()
+    ld2410-json.json       buildSerialStudioCSV()
