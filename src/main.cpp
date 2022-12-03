@@ -20,7 +20,7 @@
           "d":[ 
                   { "t":"Stationary", "v":"%2", "g":true, "u":"cm" },
                   { "t":"Detection", "v":"%2", "g":true, "u":"cm" },
-                  { "t":"Energy", "v":"%2", "g":true },
+                  { "t":"Energy", "v":"%2", "g":true,"u":"signal" },
               ] 
       },
       { "t":"Gate 0", 
@@ -93,7 +93,7 @@ uint32_t pos = 0;
 uint32_t pos1 = 0;
 uint32_t pos2 = 0;
 char buffer1[512];
-char serialBuffer[4096];
+char serialBuffer[3072];
 
 void setup(void)
 {
@@ -116,6 +116,40 @@ void setup(void)
   }  
 }
 
+/*
+ * JSON Values for SerialStudio App - see test folder */
+int buildSerialStudioJSON() {
+  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"t\":\"LD2410-Sensor\",\"g\":[{\"t\":\"Moving-Target\",\"d\":[{\"t\":\"Moving\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100}]},{\"t\":\"Stationary-Target\",\"d\":[{\"t\":\"Stationary\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100}]},",
+    radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
+
+  for(int x = 0; x < LD2410_MAX_GATES; ++x) {
+    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Gate-%d\",\"d\":[{\"t\":\"Movement-Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100},{\"t\":\"Static-Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100}]},", 
+              x, radar.engMovingDistanceGateEnergy(x), radar.engStaticDistanceGateEnergy(x));  
+    strcat(serialBuffer, buffer1);
+    pos += pos1;
+  }
+  serialBuffer[--pos] = 0;
+  strcat(serialBuffer, "]}*/\n");
+
+  return Serial.print(serialBuffer);
+}
+
+/*
+ * CSV like Values for SerialStudio App - see test folder */
+int buildSerialStudioCSV() {
+  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*LD2410-Sensor,%d,%d,%d,%d,%d,%d,",radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
+
+  for(int x = 0; x < LD2410_MAX_GATES; ++x) {
+    pos1 = snprintf(buffer1,sizeof(buffer1),"%d,%d,", radar.engMovingDistanceGateEnergy(x), radar.engStaticDistanceGateEnergy(x));  
+    strcat(serialBuffer, buffer1);
+    pos += pos1;
+  }
+  serialBuffer[--pos] = 0;
+  strcat(serialBuffer, "*/\n");
+
+  return Serial.print(serialBuffer);
+}
+
 void loop()
 {
   radar.ld2410_loop();
@@ -125,20 +159,8 @@ void loop()
     lastReading = millis();
     if(radar.presenceDetected())
     {
-      // pos = snprintf(serialBuffer,sizeof(serialBuffer),"{\"t\":\"LD2410 Sensor\",\"g\":[{\"t\":\"Moving Target\",\"d\":[{\"t\":\"Moving\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true }]},{\"t\":\"Stationary Target\",\"d\":[{\"t\":\"Stationary\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true}]}],\"g\":[",
-      pos = snprintf(serialBuffer,sizeof(serialBuffer),"{\"t\":\"LD2410 Sensor\",\"g\":[{\"t\":\"Moving Target\",\"d\":[{\"t\":\"Moving\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true }]},{\"t\":\"Stationary Target\",\"d\":[{\"t\":\"Stationary\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true}]},",
-        radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
-
-      for(int x = 0; x < LD2410_MAX_GATES; ++x) {
-        pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Gate %d\",\"d\":[{\"t\":\"Movement Energy\",\"v\":%d,\"g\":true},{\"t\":\"Static Energy\",\"v\":%d,\"g\":true}]},", 
-                  x, radar.engMovingDistanceGateEnergy(x), radar.engStaticDistanceGateEnergy(x));  
-        strcat(serialBuffer, buffer1);
-        pos += pos1;
-      }
-      serialBuffer[--pos] = 0;
-      strcat(serialBuffer, "]}\n");
-
-      Serial.print(serialBuffer);
+      buildSerialStudioCSV();
     }
   }
 }
+

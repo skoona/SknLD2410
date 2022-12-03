@@ -1,0 +1,411 @@
+{
+    "frameEnd": "*/",
+    "frameParser": "/* \n * @brief Frame parsing function, you can modify this to suit your needs.\n * \n * By customizing this code, you can use a single JSON project file to \n * process different kinds of frames that are sent by the microcontroller \n * or any data source that is connected to Serial Studio. Frame parsing code\n * is specific to every JSON project that you create.\n *\n * @param frame      string with the latest received frame.\n * @param separator  data separator sequence defined by the JSON project.\n *\n * @note.            only data that is *inside* the data delimiters will\n *                   be processed by the frame parser.\n *\n * @note             you can safely declare global variables outside the\n *                   @c parse() function.\n */\nfunction parse(frame, separator) {\n    return frame.split(separator);\n}",
+    "frameStart": "/*",
+    "groups": [
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Stationary",
+                    "units": "cm",
+                    "value": "%5",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Detection",
+                    "units": "cm",
+                    "value": "%6",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Energy",
+                    "units": "signal",
+                    "value": "%7",
+                    "widget": ""
+                }
+            ],
+            "title": "Stationary Target",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Moving",
+                    "units": "cm",
+                    "value": "%2",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Detection",
+                    "units": "cm",
+                    "value": "%3",
+                    "widget": ""
+                },
+                {
+                    "alarm": 100,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 100,
+                    "min": 0,
+                    "title": "Energy",
+                    "units": "signal",
+                    "value": "%4",
+                    "widget": ""
+                }
+            ],
+            "title": "Moving-Target",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%8",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%9",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 0",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%10",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%11",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 1",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%12",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%13",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 2",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%14",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%15",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 3",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%16",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%17",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 4",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%18",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%19",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 5",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%20",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%21",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 6",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%22",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%23",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 7",
+            "widget": ""
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Movement Energy",
+                    "units": "cm",
+                    "value": "%24",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": true,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Static Energy",
+                    "units": "cm",
+                    "value": "%25",
+                    "widget": ""
+                }
+            ],
+            "title": "Gate 8",
+            "widget": ""
+        }
+    ],
+    "separator": ",",
+    "title": "LD2410 Sensor"
+}
