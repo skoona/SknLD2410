@@ -85,12 +85,12 @@ void setup(void)
 /*
  * JSON Values for SerialStudio App - see test folder */
 int buildSerialStudioJSON() {
-  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"t\":\"LD2410-Sensor\",\"g\":[{\"t\":\"Moving-Target\",\"d\":[{\"t\":\"Moving\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100}]},{\"t\":\"Stationary-Target\",\"d\":[{\"t\":\"Stationary\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100}]},",
+  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"title\":\"LD2410-Sensor\",\"groups\":[{\"title\":\"Moving Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Moving\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},{\"title\":\"Stationary Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Stationary\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},",
     radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
 
   for(int x = 0; x < LD2410_MAX_GATES; ++x) {
-    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Gate-%d\",\"d\":[{\"t\":\"Movement-Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100},{\"t\":\"Static-Energy\",\"v\":%d,\"g\":true,\"u\":\"signal\",\"w\":\"bar\",\"min\":0,\"max\":100}]},", 
-              x, radar.engMovingDistanceGateEnergy(x), radar.engStaticDistanceGateEnergy(x));  
+    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"title\":\"Gate %d\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Movement Energy\",\"alarm\":%d,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100},{\"title\":\"Static Energy\",\"alarm\":%d,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},", 
+              x, radar.cfgMovingGateSensitivity(x), radar.engMovingDistanceGateEnergy(x), radar.cfgStationaryGateSensitivity(x), radar.engStaticDistanceGateEnergy(x));  
     strcat(serialBuffer, buffer1);
     pos += pos1;
   }
@@ -125,7 +125,7 @@ void loop()
     lastReading = millis();
     if(radar.presenceDetected())
     {
-      buildSerialStudioCSV();
+      buildSerialStudioJSON();
     }
   }
 }
