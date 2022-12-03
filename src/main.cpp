@@ -1,7 +1,7 @@
 /*
  * Example sketch for reporting on readings from the LD2410 using whatever settings are currently configured.
  * 
- * The sketch assumes an ESP32 board with the LD2410 connected as Serial1 to pins 8 & 9, the serial configuration for other boards may vary
+ * The sketch assumes an ESP32 board with the LD2410 connected as Serial1 to pins 16 & 17, the serial configuration for other boards may vary
  * 
  */
 
@@ -29,42 +29,9 @@
                   { "t":"Static Energy", "v":"%2", "g":true }
               ] 
       },
-      { "t":"Gate 1", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
-      { "t":"Gate 2", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
-      { "t":"Gate 3", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
-      { "t":"Gate 4", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
-      { "t":"Gate 5", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
-      { "t":"Gate 6", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
+      
+      ...
+
       { "t":"Gate 7", 
           "d":[ 
                   { "t":"Movement Energy", "v":"%2", "g":true },
@@ -100,7 +67,6 @@ void setup(void)
   delay(1000);
   Serial.begin(115200); //Feedback over Serial Monitor
   delay(100);
-  // radar.debug(Serial); //Uncomment to show debug information from the library on the Serial Monitor. By default this does not show sensor reads as they are very frequent.
   Serial2.begin (256000, SERIAL_8N1, RXD2, TXD2); //UART for monitoring the radar rx, tx
   delay(100);
   Serial.println(F("\nLD2410 radar sensor initialising: "));
