@@ -7,4 +7,9 @@ This module is currently under evaluation and the included program exposes all o
 
 ![](ld2410pinout.jpg)
 
-The test directory of this repo contains a JSON file formatted for the [SerialStudio application](https://github.com/Serial-Studio/Serial-Studio)
+The test directory of this repo contains a JSON file formatted for the [SerialStudio application](https://github.com/Serial-Studio/Serial-Studio). 
+The provided ESP program and SerialStudio app are worth looking at.
+
+![](SerialStudio-Screenshot.png)
+
+
