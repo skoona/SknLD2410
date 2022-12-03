@@ -120,7 +120,7 @@ void loop()
 {
   radar.ld2410_loop();
 
-  if(radar.isConnected() && millis() - lastReading > 2000)  //Report every 1000ms
+  if(radar.isConnected() && millis() - lastReading > 1000)  //Report every 1000ms
   {
     lastReading = millis();
     if(radar.presenceDetected())
