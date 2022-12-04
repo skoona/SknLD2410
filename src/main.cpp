@@ -6,31 +6,30 @@
  */
 
 #include <Arduino.h>
-#include <AsyncTCP.h>
-#include <DNSServer.h>
 #include <WiFi.h>
+#include <AsyncUDP.h>
 #include <ld2410.h>
 
 #define RXD2 16 // 8
 #define TXD2 17 // 9
-// #define SERIAL_STUDIO_TCP 1
-#define DNS_PORT 53
+#define SERIAL_STUDIO 1
 
-#ifdef SERIAL_STUDIO_TCP
-AsyncClient client;
-static DNSServer DNS;
+#ifdef SERIAL_STUDIO
+AsyncUDP udp;
 #endif
 
-const char* ssid = WIFI_SSID;
-const char* password = WIFI_PASS;
-const uint16_t port = 7777; //8090;
-const char * host = "10.100.1.5";
-
+const char* ssid           = WIFI_SSID;
+const char* ssidPassword   = WIFI_PASS;
+const uint16_t    sendPort = 8090;
+const uint16_t  listenPort = 8090;
+const char * remoteHost    = "10.100.1.5";
+IPAddress ipSerialStudio(10, 100, 1, 5);
 ld2410 radar;
 uint32_t lastReading = 0;
-uint32_t pos = 0;
-uint32_t pos1 = 0;
-uint32_t pos2 = 0;
+uint32_t pos         = 0;
+uint32_t pos1        = 0;
+uint32_t pos2        = 0;
+bool sending_enabled = true;
 char buffer1[512];
 char serialBuffer[3072];
 
@@ -49,14 +48,14 @@ int buildLongSerialStudioJSON() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "]}*/\n");
 
-  #ifdef SERIAL_STUDIO_TCP
-  if (client.connected() > 0) {
-    return client.write(serialBuffer, strlen(serialBuffer));
+#ifdef SERIAL_STUDIO
+  if (udp.connected() > 0) {
+    return udp.broadcastTo(serialBuffer,sendPort);
   }
   return 0;
-  #else
-    return Serial.print(serialBuffer);
-  #endif
+#else
+  return Serial.print(serialBuffer);
+#endif
 }
 
 /*
@@ -74,14 +73,14 @@ int buildShortSerialStudioJSON() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "]}*/\n");
 
-  #ifdef SERIAL_STUDIO_TCP
-  if (client.connected() > 0) {
-    return client.write(serialBuffer, strlen(serialBuffer));
+#ifdef SERIAL_STUDIO
+  if (udp.connected() > 0) {
+    return udp.broadcastTo(serialBuffer,sendPort);
   }
   return 0;
-  #else
-    return Serial.print(serialBuffer);
-  #endif
+#else
+  return Serial.print(serialBuffer);
+#endif
 }
 
 /*
@@ -97,14 +96,14 @@ int buildSerialStudioCSV() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "*/\n");
 
-  #ifdef SERIAL_STUDIO_TCP
-  if (client.connected() > 0) {
-    return client.write(serialBuffer, strlen(serialBuffer));
+#ifdef SERIAL_STUDIO
+  if (udp.connected() > 0) {
+    return udp.broadcastTo(serialBuffer,sendPort);
   }
   return 0;
-  #else
-    return Serial.print(serialBuffer);
-  #endif
+#else
+  return Serial.print(serialBuffer);
+#endif
 }
 
 /*
@@ -120,14 +119,15 @@ int buildWithAlarmSerialStudioCSV() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "*/\n");
 
-  #ifdef SERIAL_STUDIO_TCP
-  if (client.connected() > 0) {
-    return client.write(serialBuffer, strlen(serialBuffer));
+#ifdef SERIAL_STUDIO
+  if (udp.connected() > 0) {
+    return udp.broadcastTo(serialBuffer,sendPort);
+    // return udp.broadcast(serialBuffer,strlen(serialBuffer));
   }
   return 0;
-  #else
-    return Serial.print(serialBuffer);
-  #endif
+#else
+  return Serial.print(serialBuffer);
+#endif
 }
 
 void setup(void)
@@ -142,40 +142,43 @@ void setup(void)
   // radar.debug(Serial);
   Serial2.begin (256000, SERIAL_8N1, RXD2, TXD2); //UART for monitoring the radar rx, tx
   Serial.flush();
-  delay(250);  
 
-#ifdef SERIAL_STUDIO_TCP
+#ifdef SERIAL_STUDIO
   // Start WiFi
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while(WiFi.status() != WL_CONNECTED) {
-        delay(500);
-  }
+  WiFi.begin(ssid, ssidPassword);
+  delay(500);
   Serial.print("WiFi connected with IP: ");
   Serial.println(WiFi.localIP());
 
-  Serial.println(F("Connecting Client..."));
-  
-  client.onError([](void* arg, AsyncClient * c, int8_t error) {
-    Serial.printf("Error: %s\n\n", c->errorToString(error));
-  });
-  client.onTimeout([](void* arg, AsyncClient * c, uint32_t time) {
-    Serial.printf("Timeout\n\n");
-  });
-  client.onData([](void *arg, AsyncClient *c, void *data, size_t len) {
-	  Serial.printf("\n data received from %s \n", c->remoteIP().toString().c_str());
-  });
-  client.onConnect([](void* arg, AsyncClient * c) {
-    Serial.printf("\n client has been connected to %s on port %d \n", host, port);
-  });
-  
-  if (!DNS.start(DNS_PORT, host, WiFi.softAPIP())) {
-		Serial.printf("\n failed to start dns service \n");
+  if(udp.listen(listenPort)) {
+    udp.onPacket([](AsyncUDPPacket packet) {
+      Serial.print("UDP Packet Type: ");
+      Serial.print(packet.isBroadcast() ? "Broadcast" : packet.isMulticast() ? "Multicast" : "Unicast");
+      Serial.print(", From: ");
+      Serial.print(packet.remoteIP());
+      Serial.print(":");
+      Serial.print(packet.remotePort());
+      Serial.print(", To: ");
+      Serial.print(packet.localIP());
+      Serial.print(":");
+      Serial.print(packet.localPort());
+      Serial.print(", Length: ");
+      Serial.print(packet.length()); 
+      Serial.print(", Data: ");
+      Serial.write(packet.data(), packet.length());
+      Serial.println();
+      // String myString = (const char*)packet.data();  
+      if(packet.data()[0]=='+') {
+        sending_enabled = true;
+      } else if(packet.data()[0]=='-') {
+        sending_enabled = false;
+      }
+    });
   }
 
-  while (!client.connect(host, port)) {
-    delay(1000);  
-  }
+  // udp.connect(ipSerialStudio,sendPort); // 10.100.1.186
+
   Serial.println(F("Client Initialized..."));
 #endif
 
@@ -191,28 +194,21 @@ void setup(void)
     Serial.println(F(" Sensor was not connected"));
   }
 
-  // Serial.println(F("setup() Complete..."));
+  Serial.println(F("setup() Complete..."));
 }
 
 void loop()
 {
-#ifdef SERIAL_STUDIO_TCP
-  DNS.processNextRequest();
-#endif
-
   radar.ld2410_loop();
 
-  if(radar.isConnected() && millis() - lastReading > 1000)  //Report every 1000ms
-  {
-    lastReading = millis();
-    if(radar.presenceDetected())
+  if(sending_enabled) {  
+    if(radar.isConnected() && millis() - lastReading > 1000)  //Report every 1000ms
     {
-      #ifdef SERIAL_STUDIO_TCP
-      if(!client.connected()) {
-        client.connect(host, port);
+      lastReading = millis();
+      if(radar.presenceDetected())
+      {
+        buildWithAlarmSerialStudioCSV();
       }
-      #endif
-      buildWithAlarmSerialStudioCSV();
     }
   }
 }
