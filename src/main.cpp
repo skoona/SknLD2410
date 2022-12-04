@@ -23,9 +23,10 @@ const char* ssid           = WIFI_SSID;
 const char* ssidPassword   = WIFI_PASS;
 const uint16_t    sendPort = 8090;
 const uint16_t  listenPort = 8091;
-const char * remoteHost    = "10.100.1.5";
 IPAddress ipSerialStudio(10, 100, 1, 5);
+
 ld2410 radar;
+
 uint32_t lastReading = 0;
 uint32_t pos         = 0;
 uint32_t pos1        = 0;
@@ -122,7 +123,7 @@ int buildWithAlarmSerialStudioCSV() {
 
 #ifdef SERIAL_STUDIO
   if (udp.connected() > 0) {
-    return udp.broadcastTo(serialBuffer,sendPort);
+    return udp.broadcastTo(serialBuffer,sendPort);    
   }
   return 0;
 #else
@@ -153,34 +154,36 @@ void setup(void)
   }
   Serial.print("WiFi connected with IP: ");
   Serial.println(WiFi.localIP());
+  // 10.100.1.186
+
+  udp.onPacket([](AsyncUDPPacket packet) {
+    Serial.print("UDP Packet Type: ");
+    Serial.print(packet.isBroadcast() ? "Broadcast" : packet.isMulticast() ? "Multicast" : "Unicast");
+    Serial.print(", From: ");
+    Serial.print(packet.remoteIP());
+    Serial.print(":");
+    Serial.print(packet.remotePort());
+    Serial.print(", To: ");
+    Serial.print(packet.localIP());
+    Serial.print(":");
+    Serial.print(packet.localPort());
+    Serial.print(", Length: ");
+    Serial.print(packet.length()); 
+    Serial.print(", Data: ");
+    Serial.write(packet.data(), packet.length());
+    Serial.println();
+    // String myString = (const char*)packet.data();  
+    if(packet.data()[0]=='+') {
+      sending_enabled = true;
+    } else if(packet.data()[0]=='-') {
+      sending_enabled = false;
+    }
+  });
 
   if(udp.listen(listenPort)) {
-    udp.onPacket([](AsyncUDPPacket packet) {
-      Serial.print("UDP Packet Type: ");
-      Serial.print(packet.isBroadcast() ? "Broadcast" : packet.isMulticast() ? "Multicast" : "Unicast");
-      Serial.print(", From: ");
-      Serial.print(packet.remoteIP());
-      Serial.print(":");
-      Serial.print(packet.remotePort());
-      Serial.print(", To: ");
-      Serial.print(packet.localIP());
-      Serial.print(":");
-      Serial.print(packet.localPort());
-      Serial.print(", Length: ");
-      Serial.print(packet.length()); 
-      Serial.print(", Data: ");
-      Serial.write(packet.data(), packet.length());
-      Serial.println();
-      // String myString = (const char*)packet.data();  
-      if(packet.data()[0]=='+') {
-        sending_enabled = true;
-      } else if(packet.data()[0]=='-') {
-        sending_enabled = false;
-      }
-    });
+    Serial.print(F("Client Listening on port: "));
+    Serial.println(listenPort);
   }
-
-  // udp.connect(ipSerialStudio,sendPort); // 10.100.1.186
 
   Serial.println(F("Client Initialized..."));
 #endif
