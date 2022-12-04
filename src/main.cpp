@@ -5,82 +5,34 @@
  * 
  */
 
-/*
-{ 
-"t":"LD2410 Sensor", 
-"g":[ 
-      { "t":"Moving Target", 
-          "d":[ 
-                  { "t":"Moving", "v":"%2", "g":true, "u":"cm" },
-                  { "t":"Detection", "v":"%2", "g":true, "u":"cm" },
-                  { "t":"Energy", "v":"%2", "g":true },
-              ] 
-      },
-      { "t":"Stationary Target", 
-          "d":[ 
-                  { "t":"Stationary", "v":"%2", "g":true, "u":"cm" },
-                  { "t":"Detection", "v":"%2", "g":true, "u":"cm" },
-                  { "t":"Energy", "v":"%2", "g":true,"u":"signal" },
-              ] 
-      },
-      { "t":"Gate 0", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
-      
-      ...
-
-      { "t":"Gate 7", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      },
-      { "t":"Gate 8", 
-          "d":[ 
-                  { "t":"Movement Energy", "v":"%2", "g":true },
-                  { "t":"Static Energy", "v":"%2", "g":true }
-              ] 
-      }
-    ] 
-}
-*/
-
+#include <Arduino.h>
+#include <AsyncTCP.h>
+#include <DNSServer.h>
+#include <WiFi.h>
 #include <ld2410.h>
 
 #define RXD2 16 // 8
 #define TXD2 17 // 9
+// #define SERIAL_STUDIO_TCP 1
+#define DNS_PORT 53
+
+#ifdef SERIAL_STUDIO_TCP
+AsyncClient client;
+static DNSServer DNS;
+#endif
+
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASS;
+const uint16_t port = 7777; //8090;
+const char * host = "10.100.1.5";
 
 ld2410 radar;
-
 uint32_t lastReading = 0;
 uint32_t pos = 0;
 uint32_t pos1 = 0;
 uint32_t pos2 = 0;
 char buffer1[512];
 char serialBuffer[3072];
-
-void setup(void)
-{
-  delay(1000);
-  Serial.begin(115200); //Feedback over Serial Monitor
-  delay(100);
-  Serial2.begin (256000, SERIAL_8N1, RXD2, TXD2); //UART for monitoring the radar rx, tx
-  delay(100);
-  Serial.println(F("\nLD2410 radar sensor initialising: "));
-  if(radar.begin(Serial2))
-  {
-    Serial.println(F("OK "));
-    delay(0);
-    radar.requestStartEngineeringMode();
-  }
-  else
-  {
-    Serial.println(F(" not connected"));
-  }  
-}
 
 /*
  * JSON Values for SerialStudio App - see test folder */
@@ -97,7 +49,14 @@ int buildLongSerialStudioJSON() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "]}*/\n");
 
-  return Serial.print(serialBuffer);
+  #ifdef SERIAL_STUDIO_TCP
+  if (client.connected() > 0) {
+    return client.write(serialBuffer, strlen(serialBuffer));
+  }
+  return 0;
+  #else
+    return Serial.print(serialBuffer);
+  #endif
 }
 
 /*
@@ -115,7 +74,14 @@ int buildShortSerialStudioJSON() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "]}*/\n");
 
-  return Serial.print(serialBuffer);
+  #ifdef SERIAL_STUDIO_TCP
+  if (client.connected() > 0) {
+    return client.write(serialBuffer, strlen(serialBuffer));
+  }
+  return 0;
+  #else
+    return Serial.print(serialBuffer);
+  #endif
 }
 
 /*
@@ -131,7 +97,14 @@ int buildSerialStudioCSV() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "*/\n");
 
-  return Serial.print(serialBuffer);
+  #ifdef SERIAL_STUDIO_TCP
+  if (client.connected() > 0) {
+    return client.write(serialBuffer, strlen(serialBuffer));
+  }
+  return 0;
+  #else
+    return Serial.print(serialBuffer);
+  #endif
 }
 
 /*
@@ -147,11 +120,86 @@ int buildWithAlarmSerialStudioCSV() {
   serialBuffer[--pos] = 0;
   strcat(serialBuffer, "*/\n");
 
-  return Serial.print(serialBuffer);
+  #ifdef SERIAL_STUDIO_TCP
+  if (client.connected() > 0) {
+    return client.write(serialBuffer, strlen(serialBuffer));
+  }
+  return 0;
+  #else
+    return Serial.print(serialBuffer);
+  #endif
+}
+
+void setup(void)
+{
+  delay(1000);
+
+  // start console path
+  Serial.begin(115200);
+  delay(250);
+
+  // start path to LD2410
+  // radar.debug(Serial);
+  Serial2.begin (256000, SERIAL_8N1, RXD2, TXD2); //UART for monitoring the radar rx, tx
+  Serial.flush();
+  delay(250);  
+
+#ifdef SERIAL_STUDIO_TCP
+  // Start WiFi
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  while(WiFi.status() != WL_CONNECTED) {
+        delay(500);
+  }
+  Serial.print("WiFi connected with IP: ");
+  Serial.println(WiFi.localIP());
+
+  Serial.println(F("Connecting Client..."));
+  
+  client.onError([](void* arg, AsyncClient * c, int8_t error) {
+    Serial.printf("Error: %s\n\n", c->errorToString(error));
+  });
+  client.onTimeout([](void* arg, AsyncClient * c, uint32_t time) {
+    Serial.printf("Timeout\n\n");
+  });
+  client.onData([](void *arg, AsyncClient *c, void *data, size_t len) {
+	  Serial.printf("\n data received from %s \n", c->remoteIP().toString().c_str());
+  });
+  client.onConnect([](void* arg, AsyncClient * c) {
+    Serial.printf("\n client has been connected to %s on port %d \n", host, port);
+  });
+  
+  if (!DNS.start(DNS_PORT, host, WiFi.softAPIP())) {
+		Serial.printf("\n failed to start dns service \n");
+  }
+
+  while (!client.connect(host, port)) {
+    delay(1000);  
+  }
+  Serial.println(F("Client Initialized..."));
+#endif
+
+  // Start LD2410 Sensor
+  if(radar.begin(Serial2))
+  {
+    // Serial.println(F("Sensor Initialized..."));
+    delay(500);
+    radar.requestStartEngineeringMode();
+  }
+  else
+  {
+    Serial.println(F(" Sensor was not connected"));
+  }
+
+  // Serial.println(F("setup() Complete..."));
 }
 
 void loop()
 {
+#ifdef SERIAL_STUDIO_TCP
+  DNS.processNextRequest();
+#endif
+
   radar.ld2410_loop();
 
   if(radar.isConnected() && millis() - lastReading > 1000)  //Report every 1000ms
@@ -159,6 +207,11 @@ void loop()
     lastReading = millis();
     if(radar.presenceDetected())
     {
+      #ifdef SERIAL_STUDIO_TCP
+      if(!client.connected()) {
+        client.connect(host, port);
+      }
+      #endif
       buildWithAlarmSerialStudioCSV();
     }
   }
