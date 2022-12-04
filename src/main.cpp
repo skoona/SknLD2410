@@ -36,6 +36,14 @@ char buffer1[512];
 char serialBuffer[3072];
 
 /*
+ * Send data via UDP */
+void sendToSerialStudio(String str) {
+  udp.connect(ipSerialStudio,sendPort);
+  udp.print(str);
+  return udp.close();
+}
+
+/*
  * JSON Values for SerialStudio App - see test folder */
 int buildLongSerialStudioJSON() {
   pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"title\":\"%s\",\"groups\":[{\"title\":\"Moving Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Moving\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},{\"title\":\"Stationary Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Stationary\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},",
@@ -51,9 +59,7 @@ int buildLongSerialStudioJSON() {
   strcat(serialBuffer, "]}*/\n");
 
 #ifdef SERIAL_STUDIO
-  if (udp.connected() > 0) {
-    return udp.broadcastTo(serialBuffer,sendPort);
-  }
+  sendToSerialStudio(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -76,9 +82,7 @@ int buildShortSerialStudioJSON() {
   strcat(serialBuffer, "]}*/\n");
 
 #ifdef SERIAL_STUDIO
-  if (udp.connected() > 0) {
-    return udp.broadcastTo(serialBuffer,sendPort);
-  }
+  sendToSerialStudio(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -99,9 +103,7 @@ int buildSerialStudioCSV() {
   strcat(serialBuffer, "*/\n");
 
 #ifdef SERIAL_STUDIO
-  if (udp.connected() > 0) {
-    return udp.broadcastTo(serialBuffer,sendPort);
-  }
+  sendToSerialStudio(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -122,9 +124,7 @@ int buildWithAlarmSerialStudioCSV() {
   strcat(serialBuffer, "*/\n");
 
 #ifdef SERIAL_STUDIO
-  if (udp.connected() > 0) {
-    return udp.broadcastTo(serialBuffer,sendPort);    
-  }
+  sendToSerialStudio(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -172,12 +172,14 @@ void setup(void)
     Serial.print(", Data: ");
     Serial.write(packet.data(), packet.length());
     Serial.println();
-    // String myString = (const char*)packet.data();  
+
+    // Parse Command plus or minus +/-
     if(packet.data()[0]=='+') {
-      sending_enabled = true;
+      sending_enabled = true;      
     } else if(packet.data()[0]=='-') {
       sending_enabled = false;
     }
+     Serial.printf("SerialStudio Dataflow %s\n", sending_enabled ? "Enabled" : "Disabled" );
   });
 
   if(udp.listen(listenPort)) {
