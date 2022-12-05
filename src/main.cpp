@@ -481,10 +481,7 @@ void loop()
     if(radar.isConnected() && millis() - lastReading > 1000)  //Report every 1000ms
     {
       lastReading = millis();
-      if(radar.presenceDetected())
-      {
-        buildWithAlarmSerialStudioCSV();
-      }
+      buildWithAlarmSerialStudioCSV();
     }
   }
   if(udpFlag && (command.length() > 1)) { // handle cb request
