@@ -43,7 +43,7 @@
                     "max": 100,
                     "min": 0,
                     "title": "Energy",
-                    "units": "signal",
+                    "units": "dBZ",
                     "value": "%4",
                     "widget": ""
                 }
@@ -91,7 +91,7 @@
                     "max": 0,
                     "min": 0,
                     "title": "Energy",
-                    "units": "signal",
+                    "units": "dBZ",
                     "value": "%7",
                     "widget": ""
                 }
@@ -111,9 +111,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%9",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%10",
@@ -125,9 +125,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%11",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 0",
@@ -145,9 +145,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%13",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%14",
@@ -159,9 +159,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%15",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 1",
@@ -179,9 +179,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%17",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%18",
@@ -193,9 +193,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%19",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 2",
@@ -213,9 +213,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%21",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%22",
@@ -227,9 +227,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%23",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 3",
@@ -247,9 +247,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%25",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%26",
@@ -261,9 +261,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%27",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 4",
@@ -281,9 +281,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%29",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%30",
@@ -295,9 +295,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%31",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 5",
@@ -315,9 +315,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%33",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%34",
@@ -329,9 +329,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%35",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 6",
@@ -349,9 +349,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%37",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%38",
@@ -363,9 +363,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%39",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 7",
@@ -383,9 +383,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Movement Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%41",
-                    "widget": ""
+                    "widget": "bar"
                 },
                 {
                     "alarm": "%42",
@@ -397,9 +397,9 @@
                     "max": 100,
                     "min": 0,
                     "title": "Static Energy",
-                    "units": "cm",
+                    "units": "dBZ",
                     "value": "%43",
-                    "widget": ""
+                    "widget": "bar"
                 }
             ],
             "title": "Gate 8",
