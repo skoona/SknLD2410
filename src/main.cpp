@@ -27,7 +27,7 @@ IPAddress ipSerialStudio(10, 100, 1, 5);
 IPAddress ipRemote(10, 100, 1, 5);
 
 ld2410 radar;
-
+volatile bool udpFlag = false; // send for callback
 uint32_t lastReading = 0;
 uint32_t pos         = 0;
 uint32_t pos1        = 0;
@@ -293,8 +293,12 @@ void commandHandler() {
 
 /*
  * Send data via UDP */
-void sendToRequestor(String str) {
-  udp.connect(ipSerialStudio,sendPort);
+void sendToRequestor(String str, bool requestor = false) {
+  if(requestor) {
+    udp.connect(ipRemote,sendPort);
+  }  else {
+    udp.connect(ipSerialStudio,sendPort);
+  }
   udp.print(str);
   return udp.close();
 }
@@ -431,10 +435,10 @@ void setup(void)
 
     ipRemote = packet.remoteIP();
 
-    // Parse Commands
+    // Parse Commands -- executing inside a callback can be problematic
+    // Using udpFlag to have loop handle it
     command = (const char*)packet.data(); 
-    sendToRequestor( commandProcessor(command) );        
-    command.clear();
+    udpFlag=true;
   });
 
   if(udp.listen(listenPort)) {
@@ -475,6 +479,11 @@ void loop()
         buildWithAlarmSerialStudioCSV();
       }
     }
+  }
+  if(udpFlag && (command.length() > 1)) { // handle cb request
+    sendToRequestor(commandProcessor(command), true);
+    udpFlag=false;
+    command.clear();
   }
   commandHandler();
 }
