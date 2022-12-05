@@ -24,13 +24,12 @@ AsyncUDP udp;
 
 const char* ssid           = WIFI_SSID;
 const char* ssidPassword   = WIFI_PASS;
-const uint8_t cSerialStudioHostIP[16]  = SERIAL_STUDIO_HOSTIP;
 const uint16_t    sendPort = 8090;
 const uint16_t  listenPort = 8091;
-IPAddress ipSerialStudio(cSerialStudioHostIP);
+IPAddress ipSerialStudio(10,100,1,5);
 
-uint16_t  remotePort = 8090;              // default value, will be overridden on reciept of udp request
-IPAddress ipRemote(cSerialStudioHostIP); // default value, will be overridden on reciept of udp request
+uint16_t  remotePort = 8090;     // default value, will be overridden on reciept of udp request
+IPAddress ipRemote(10,100,1,5);  // default value, will be overridden on reciept of udp request
 
 ld2410 radar;
 volatile bool udpFlag = false; // send for callback
