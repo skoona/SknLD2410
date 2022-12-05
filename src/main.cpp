@@ -34,6 +34,262 @@ uint32_t pos2        = 0;
 bool sending_enabled = true;
 char buffer1[512];
 char serialBuffer[3072];
+String command;
+
+/*
+ * Command Processor */
+String commandProcessor(String &cmdStr) {
+  String sBuf = "\n";
+  cmdStr.trim();
+
+  if(cmdStr.equals("help")) 
+  {
+    sBuf += "\nSupported commands:\n\tthelp: this text.\n\tstreamstart: start sending udp data to SerialStudio.\n\tstreamstop: stop sending to SerialStream.\n\tread: read current values from the sensor\n\treadconfig: read the configuration from the sensor\n\tsetmaxvalues <motion gate> <stationary gate> <inactivitytimer>\n\tsetsensitivity <gate> <motionsensitivity> <stationarysensitivity>\n\tenableengineeringmode: enable engineering mode\n\tdisableengineeringmode: disable engineering mode\n\trestart: restart the sensor\n\treadversion: read firmware version\n\tfactoryreset: factory reset the sensor\n";
+    sBuf += "\n\n choose> ";
+  }
+  else if(cmdStr.equals("streamstart")) 
+  {
+      sending_enabled = true;      
+      sBuf += "\nSerialStudio UDP Stream Enabled. \n"; 
+  } 
+  else if(cmdStr.equals("streamstop")) 
+  {
+      sending_enabled = false;
+      sBuf += "\nSerialStudio UDP Stream Disabled.\n";
+  }
+  else if(cmdStr.equals("read"))
+  {
+    sBuf += "\nReading from sensor: ";
+    if(radar.isConnected())
+    {
+      sBuf += "OK\n";
+      if(radar.presenceDetected())
+      {
+        if(radar.stationaryTargetDetected())
+        {
+          sBuf += "Stationary target: ";
+          sBuf += radar.stationaryTargetDistance();
+          sBuf += "cm energy: ";
+          sBuf += radar.stationaryTargetEnergy();
+          sBuf += "\n";
+        }
+        if(radar.movingTargetDetected())
+        {
+          sBuf += "Moving target: ";
+          sBuf += radar.movingTargetDistance();
+          sBuf += "cm energy: ";
+          sBuf += radar.movingTargetEnergy();
+          sBuf += "\n";
+        }
+      }
+      else
+      {
+        sBuf += "\nnothing detected\n";
+      }
+    }
+    else
+    {
+      sBuf += "failed to read\n";
+    }
+  }
+  else if(cmdStr.equals("readconfig"))
+  {
+    sBuf += "\nReading configuration from sensor: ";
+    if(radar.requestCurrentConfiguration())
+    {
+      sBuf += "OK\n";
+      sBuf += "Maximum gate ID: ";
+      sBuf += radar.cfgMaxGate();
+      sBuf += "\n";
+      sBuf += "Maximum gate for moving targets: ";
+      sBuf += radar.cfgMaxMovingGate();
+      sBuf += "\n";
+      sBuf += "Maximum gate for stationary targets: ";
+      sBuf += radar.cfgMaxStationaryGate();
+      sBuf += "\n";
+      sBuf += "Idle time for targets: "; 
+      sBuf += radar.cfgSensorIdleTimeInSeconds() ;
+      sBuf += "\n";
+      sBuf += "Gate sensitivity\n";
+      
+      for(uint8_t gate = 0; gate < LD2410_MAX_GATES; gate++)
+      {
+        sBuf += "Gate ";
+        sBuf += gate;
+        sBuf += " moving targets: ";
+        sBuf += radar.cfgMovingGateSensitivity(gate);
+        sBuf += " stationary targets: ";
+        sBuf += radar.cfgStationaryGateSensitivity(gate);
+        sBuf += "\n";
+      }
+    }
+    else
+    {
+      sBuf += "Failed\n";
+    }
+  }
+  else if(cmdStr.startsWith("setmaxvalues"))
+  {
+    uint8_t firstSpace = cmdStr.indexOf(' ');
+    uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
+    uint8_t thirdSpace = cmdStr.indexOf(' ',secondSpace + 1);
+    uint8_t newMovingMaxDistance = (cmdStr.substring(firstSpace,secondSpace)).toInt();
+    uint8_t newStationaryMaxDistance = (cmdStr.substring(secondSpace,thirdSpace)).toInt();
+    uint16_t inactivityTimer = (cmdStr.substring(thirdSpace,cmdStr.length())).toInt();
+    if(newMovingMaxDistance > 0 && newStationaryMaxDistance > 0 && newMovingMaxDistance <= 8 && newStationaryMaxDistance <= 8)
+    {
+      sBuf += "\nSetting max values to gate ";
+      sBuf += newMovingMaxDistance;
+      sBuf += " moving targets, gate ";
+      sBuf += newStationaryMaxDistance;
+      sBuf += " stationary targets, ";
+      sBuf += inactivityTimer;
+      sBuf += "s inactivity timer: ";
+      if(radar.setMaxValues(newMovingMaxDistance, newStationaryMaxDistance, inactivityTimer))
+      {
+        sBuf += "OK, now restart to apply settings\n";
+      }
+      else
+      {
+        sBuf += "failed\n";
+      }
+    }
+    else
+    {
+      sBuf += "Can't set distances to ";
+      sBuf += newMovingMaxDistance;
+      sBuf += " moving ";
+      sBuf += newStationaryMaxDistance;
+      sBuf += " stationary, try again\n";
+    }
+  }
+  else if(cmdStr.startsWith("setsensitivity"))
+  {
+    uint8_t firstSpace = cmdStr.indexOf(' ');
+    uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
+    uint8_t thirdSpace = cmdStr.indexOf(' ',secondSpace + 1);
+    uint8_t gate = (cmdStr.substring(firstSpace,secondSpace)).toInt();
+    uint8_t motionSensitivity = (cmdStr.substring(secondSpace,thirdSpace)).toInt();
+    uint8_t stationarySensitivity = (cmdStr.substring(thirdSpace,cmdStr.length())).toInt();
+    if(motionSensitivity >= 0 && stationarySensitivity >= 0 && motionSensitivity <= 100 && stationarySensitivity <= 100)
+    {
+      sBuf += "\nSetting gate ";
+      sBuf += gate;
+      sBuf += " motion sensitivity to ";
+      sBuf += motionSensitivity;
+      sBuf += " & stationary sensitivity to ";
+      sBuf += stationarySensitivity;
+      sBuf += ": \n";
+      cmdStr.clear();
+      if(radar.setGateSensitivityThreshold(gate, motionSensitivity, stationarySensitivity))
+      {
+        sBuf += "OK, now restart to apply settings\n";
+      }
+      else
+      {
+        sBuf += "failed\n";
+      }
+    }
+    else
+    {
+      sBuf += "Can't set gate ";
+      sBuf += gate;
+      sBuf += " motion sensitivity to ";
+      sBuf += motionSensitivity;
+      sBuf += " & stationary sensitivity to ";
+      sBuf += stationarySensitivity;
+      sBuf += ", try again\n";
+    }
+  }
+  else if(cmdStr.equals("enableengineeringmode"))
+  {
+    sBuf += "\nEnabling engineering mode: ";
+    if(radar.requestStartEngineeringMode())
+    {
+      sBuf += "OK\n";
+    }
+    else
+    {
+      sBuf += "failed\n";
+    }
+  }
+  else if(cmdStr.equals("disableengineeringmode"))
+  {
+    sBuf += "\nDisabling engineering mode: ";
+    if(radar.requestEndEngineeringMode())
+    {
+      sBuf += "OK\n";
+    }
+    else
+    {
+      sBuf += "failed\n";
+    }
+  }
+  else if(cmdStr.equals("restart"))
+  {
+    sBuf += "\nRestarting sensor: ";
+    if(radar.requestRestart())
+    {
+      sBuf += "OK\n";
+    }
+    else
+    {
+      sBuf += "failed\n";
+    }
+  }
+  else if(cmdStr.equals("readversion"))
+  {
+    sBuf += "\nRequesting firmware version: ";
+    if(radar.requestFirmwareVersion())
+    {
+      sBuf += radar.cmdFirmwareVersion();
+    }
+    else
+    {
+      sBuf += "Failed\n";
+    }
+  }
+  else if(cmdStr.equals("factoryreset"))
+  {
+    sBuf += "\nFactory resetting sensor: ";
+    if(radar.requestFactoryReset())
+    {
+      sBuf += "OK, now restart sensor to take effect\n";
+    }
+    else
+    {
+      sBuf += "failed\n";
+    }
+  }
+  else
+  {
+    sBuf += "\nUnknown command: ";
+    sBuf += cmdStr;
+    sBuf += "\n";
+  }
+
+  cmdStr.clear();
+  sBuf += "\n\n choose:> ";
+
+  return sBuf;
+}
+
+
+void commandHandler() {
+  if(Serial.available())
+  {
+    char typedCharacter = Serial.read();
+    if(typedCharacter == '\n') {
+      if(typedCharacter !='\r') {
+        Serial.print( commandProcessor(command) );        
+      }
+    } else {
+      Serial.print(typedCharacter);
+      command += typedCharacter;
+    }
+  }
+}
+
 
 /*
  * Send data via UDP */
@@ -173,13 +429,10 @@ void setup(void)
     Serial.write(packet.data(), packet.length());
     Serial.println();
 
-    // Parse Command plus or minus +/-
-    if(packet.data()[0]=='+') {
-      sending_enabled = true;      
-    } else if(packet.data()[0]=='-') {
-      sending_enabled = false;
-    }
-     Serial.printf("SerialStudio Dataflow %s\n", sending_enabled ? "Enabled" : "Disabled" );
+    // Parse Commands
+    command = (const char*)packet.data(); 
+    sendToSerialStudio( commandProcessor(command) );        
+    command.clear();
   });
 
   if(udp.listen(listenPort)) {
@@ -203,6 +456,8 @@ void setup(void)
   }
 
   Serial.println(F("setup() Complete..."));
+  Serial.println(F("\nSupported commands:\n\thelp: this text.\n\tstreamstart: start sending udp data to SerialStudio.\n\tstreamstop: stop sending to SerialStream.\n\tread: read current values from the sensor\n\treadconfig: read the configuration from the sensor\n\tsetmaxvalues <motion gate> <stationary gate> <inactivitytimer>\n\tsetsensitivity <gate> <motionsensitivity> <stationarysensitivity>\n\tenableengineeringmode: enable engineering mode\n\tdisableengineeringmode: disable engineering mode\n\trestart: restart the sensor\n\treadversion: read firmware version\n\tfactoryreset: factory reset the sensor\n"));
+  Serial.print("\n\n choose> ");
 }
 
 void loop()
@@ -219,6 +474,7 @@ void loop()
       }
     }
   }
+  commandHandler();
 }
 //              %1,2,3, 4, 5,6,7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43
 /*LD2410 Sensor 01,0,0,62,43,0,0,50,15, 0, 0,50,15, 0, 0,40, 5,40,62,30, 9,40,45,20, 3,30,25,15, 6,30,18,15, 1,20,10,15, 2,20, 8,15, 7,20, 6*/
