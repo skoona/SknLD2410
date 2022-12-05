@@ -5,6 +5,11 @@
  * 
  * Program broadcasts reporting data on port 8090,, and listens on port 8091 for commands or configuration requests, response to callers ip/port as discovered.
  * 
+ * WIFI_SSID and WIFI_PASS are double-quoted environment variables with related values, 
+ * -- example: export PLATFORMIO_BUILD_FLAGS=-DWIFI_PASS='"ssid-password"' -DWIFI_SSID='"ssid-value"'
+ * or 
+ * -- example: export WIFI_PASS='"ssid-password"'
+ * --          export WIFI_SSID='"ssid-value"'
  */
 
 #include <Arduino.h>
