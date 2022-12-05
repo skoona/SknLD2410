@@ -24,6 +24,7 @@ const char* ssidPassword   = WIFI_PASS;
 const uint16_t    sendPort = 8090;
 const uint16_t  listenPort = 8091;
 IPAddress ipSerialStudio(10, 100, 1, 5);
+IPAddress ipRemote(10, 100, 1, 5);
 
 ld2410 radar;
 
@@ -180,7 +181,6 @@ String commandProcessor(String &cmdStr) {
       sBuf += " & stationary sensitivity to ";
       sBuf += stationarySensitivity;
       sBuf += ": \n";
-      cmdStr.clear();
       if(radar.setGateSensitivityThreshold(gate, motionSensitivity, stationarySensitivity))
       {
         sBuf += "OK, now restart to apply settings\n";
@@ -293,7 +293,7 @@ void commandHandler() {
 
 /*
  * Send data via UDP */
-void sendToSerialStudio(String str) {
+void sendToRequestor(String str) {
   udp.connect(ipSerialStudio,sendPort);
   udp.print(str);
   return udp.close();
@@ -315,7 +315,7 @@ int buildLongSerialStudioJSON() {
   strcat(serialBuffer, "]}*/\n");
 
 #ifdef SERIAL_STUDIO
-  sendToSerialStudio(String(serialBuffer));
+  sendToRequestor(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -338,7 +338,7 @@ int buildShortSerialStudioJSON() {
   strcat(serialBuffer, "]}*/\n");
 
 #ifdef SERIAL_STUDIO
-  sendToSerialStudio(String(serialBuffer));
+  sendToRequestor(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -359,7 +359,7 @@ int buildSerialStudioCSV() {
   strcat(serialBuffer, "*/\n");
 
 #ifdef SERIAL_STUDIO
-  sendToSerialStudio(String(serialBuffer));
+  sendToRequestor(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -380,7 +380,7 @@ int buildWithAlarmSerialStudioCSV() {
   strcat(serialBuffer, "*/\n");
 
 #ifdef SERIAL_STUDIO
-  sendToSerialStudio(String(serialBuffer));
+  sendToRequestor(String(serialBuffer));
   return 0;
 #else
   return Serial.print(serialBuffer);
@@ -429,9 +429,11 @@ void setup(void)
     Serial.write(packet.data(), packet.length());
     Serial.println();
 
+    ipRemote = packet.remoteIP();
+
     // Parse Commands
     command = (const char*)packet.data(); 
-    sendToSerialStudio( commandProcessor(command) );        
+    sendToRequestor( commandProcessor(command) );        
     command.clear();
   });
 
