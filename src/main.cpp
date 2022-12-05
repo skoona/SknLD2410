@@ -1,7 +1,9 @@
 /*
  * Example sketch for reporting on readings from the LD2410 using whatever settings are currently configured.
  * 
- * The sketch assumes an ESP32 board with the LD2410 connected as Serial1 to pins 16 & 17, the serial configuration for other boards may vary
+ * The sketch assumes an ESP32 board with the LD2410 connected as Serial2 on pins 16 & 17, the serial configuration for other boards may vary
+ * 
+ * Program broadcasts reporting data on port 8090,, and listens on port 8091 for commands or configuration requests, response to callers ip/port as discovered.
  * 
  */
 
@@ -13,6 +15,7 @@
 #define RXD2 16 // 8
 #define TXD2 17 // 9
 #define SNAME "LD2410 Sensor 01"
+#define SERIAL_STUDIO_HOSTIP "10.100.1.5"
 #define SERIAL_STUDIO 1
 
 #ifdef SERIAL_STUDIO
@@ -21,10 +24,13 @@ AsyncUDP udp;
 
 const char* ssid           = WIFI_SSID;
 const char* ssidPassword   = WIFI_PASS;
+const uint8_t cSerialStudioHostIP[16]  = SERIAL_STUDIO_HOSTIP;
 const uint16_t    sendPort = 8090;
 const uint16_t  listenPort = 8091;
-IPAddress ipSerialStudio(10, 100, 1, 5);
-IPAddress ipRemote(10, 100, 1, 5);
+IPAddress ipSerialStudio(cSerialStudioHostIP);
+
+uint16_t  remotePort = 8090;              // default value, will be overridden on reciept of udp request
+IPAddress ipRemote(cSerialStudioHostIP); // default value, will be overridden on reciept of udp request
 
 ld2410 radar;
 volatile bool udpFlag = false; // send for callback
@@ -295,7 +301,7 @@ void commandHandler() {
  * Send data via UDP */
 void sendToRequestor(String str, bool requestor = false) {
   if(requestor) {
-    udp.connect(ipRemote,sendPort);
+    udp.connect(ipRemote,remotePort);
   }  else {
     udp.connect(ipSerialStudio,sendPort);
   }
@@ -433,7 +439,9 @@ void setup(void)
     Serial.write(packet.data(), packet.length());
     Serial.println();
 
+    // save path for response when using udp
     ipRemote = packet.remoteIP();
+    remotePort = packet.remotePort();
 
     // Parse Commands -- executing inside a callback can be problematic
     // Using udpFlag to have loop handle it
