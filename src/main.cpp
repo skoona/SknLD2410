@@ -10,6 +10,10 @@
  * or 
  * -- example: export WIFI_PASS='"ssid-password"'
  * --          export WIFI_SSID='"ssid-value"'
+ * 
+ * Gates: 
+ * - each gate is 0.75m or 30 inches
+ *  0 to 9 gates = 6.75m or 22 feet ish
  */
 
 #include <Arduino.h>
@@ -19,8 +23,8 @@
 
 #define RXD2 16 // 8
 #define TXD2 17 // 9
+#define MAX_COMMAND_TOKENS 32
 #define SNAME "LD2410 Sensor 01"
-#define SERIAL_STUDIO_HOSTIP "10.100.1.5"
 #define SERIAL_STUDIO 1
 
 #ifdef SERIAL_STUDIO
@@ -46,6 +50,7 @@ bool sending_enabled = true;
 char buffer1[512];
 char serialBuffer[3072];
 String command;
+
 
 /*
  * Command Processor */
@@ -80,17 +85,22 @@ String commandProcessor(String &cmdStr) {
         {
           sBuf += "Stationary target: ";
           sBuf += radar.stationaryTargetDistance();
-          sBuf += "cm energy: ";
+          sBuf += " cm energy: ";
           sBuf += radar.stationaryTargetEnergy();
-          sBuf += "\n";
+          sBuf += " dBZ\n";
         }
         if(radar.movingTargetDetected())
         {
           sBuf += "Moving target: ";
           sBuf += radar.movingTargetDistance();
-          sBuf += "cm energy: ";
+          sBuf += " cm energy: ";
           sBuf += radar.movingTargetEnergy();
-          sBuf += "\n";
+          sBuf += " dBZ\n";
+        }
+        if(!radar.stationaryTargetDetected() && !radar.movingTargetDetected()) {
+          sBuf += "No Detection, in Idle Hold window of: ";
+          sBuf += radar.cfgSensorIdleTimeInSeconds();
+          sBuf += " seconds\n";
         }
       }
       else
@@ -120,7 +130,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += "\n";
       sBuf += "Idle time for targets: "; 
       sBuf += radar.cfgSensorIdleTimeInSeconds() ;
-      sBuf += "\n";
+      sBuf += "s\n";
       sBuf += "Gate sensitivity\n";
       
       for(uint8_t gate = 0; gate < LD2410_MAX_GATES; gate++)
@@ -129,9 +139,9 @@ String commandProcessor(String &cmdStr) {
         sBuf += gate;
         sBuf += " moving targets: ";
         sBuf += radar.cfgMovingGateSensitivity(gate);
-        sBuf += " stationary targets: ";
+        sBuf += " dBZ stationary targets: ";
         sBuf += radar.cfgStationaryGateSensitivity(gate);
-        sBuf += "\n";
+        sBuf += " dBZ\n";
       }
     }
     else
@@ -144,9 +154,11 @@ String commandProcessor(String &cmdStr) {
     uint8_t firstSpace = cmdStr.indexOf(' ');
     uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
     uint8_t thirdSpace = cmdStr.indexOf(' ',secondSpace + 1);
+
     uint8_t newMovingMaxDistance = (cmdStr.substring(firstSpace,secondSpace)).toInt();
     uint8_t newStationaryMaxDistance = (cmdStr.substring(secondSpace,thirdSpace)).toInt();
     uint16_t inactivityTimer = (cmdStr.substring(thirdSpace,cmdStr.length())).toInt();
+
     if(newMovingMaxDistance > 0 && newStationaryMaxDistance > 0 && newMovingMaxDistance <= 8 && newStationaryMaxDistance <= 8)
     {
       sBuf += "\nSetting max values to gate ";
@@ -179,18 +191,22 @@ String commandProcessor(String &cmdStr) {
     uint8_t firstSpace = cmdStr.indexOf(' ');
     uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
     uint8_t thirdSpace = cmdStr.indexOf(' ',secondSpace + 1);
+
     uint8_t gate = (cmdStr.substring(firstSpace,secondSpace)).toInt();
     uint8_t motionSensitivity = (cmdStr.substring(secondSpace,thirdSpace)).toInt();
     uint8_t stationarySensitivity = (cmdStr.substring(thirdSpace,cmdStr.length())).toInt();
+
+    // Command method 1 -- limit gate to 0-8 -- set one gate set
+    // Command method 2 -- limit gate to 255 -- set all gates to same sensitivity value
     if(motionSensitivity >= 0 && stationarySensitivity >= 0 && motionSensitivity <= 100 && stationarySensitivity <= 100)
     {
       sBuf += "\nSetting gate ";
       sBuf += gate;
       sBuf += " motion sensitivity to ";
       sBuf += motionSensitivity;
-      sBuf += " & stationary sensitivity to ";
+      sBuf += " dBZ & stationary sensitivity to ";
       sBuf += stationarySensitivity;
-      sBuf += ": \n";
+      sBuf += " dBZ: \n";
       if(radar.setGateSensitivityThreshold(gate, motionSensitivity, stationarySensitivity))
       {
         sBuf += "OK, now restart to apply settings\n";
@@ -206,9 +222,9 @@ String commandProcessor(String &cmdStr) {
       sBuf += gate;
       sBuf += " motion sensitivity to ";
       sBuf += motionSensitivity;
-      sBuf += " & stationary sensitivity to ";
+      sBuf += " dBZ & stationary sensitivity to ";
       sBuf += stationarySensitivity;
-      sBuf += ", try again\n";
+      sBuf += " dBZ, try again\n";
     }
   }
   else if(cmdStr.equals("enableengineeringmode"))
@@ -316,7 +332,7 @@ void sendToRequestor(String str, bool requestor = false) {
 /*
  * JSON Values for SerialStudio App - see test folder */
 int buildLongSerialStudioJSON() {
-  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"title\":\"%s\",\"groups\":[{\"title\":\"Moving Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Moving\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},{\"title\":\"Stationary Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Stationary\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},",
+  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"title\":\"%s\",\"groups\":[{\"title\":\"Moving Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Moving\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\" cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\" cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},{\"title\":\"Stationary Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Stationary\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\" cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\" cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"signal\",\"min\":0,\"max\":100}]},",
     SNAME, radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
 
   for(int x = 0; x < LD2410_MAX_GATES; ++x) {
@@ -339,7 +355,7 @@ int buildLongSerialStudioJSON() {
 /*
  * JSON Values for SerialStudio App - see test folder */
 int buildShortSerialStudioJSON() {
-  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"t\":\"%s\",\"g\":[{\"t\":\"Moving Target\",\"w\":\"multiplot\",\"d\":[{\"t\":\"Moving\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"a\":50,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"signal\",\"min\":0,\"max\":100}]},{\"t\":\"Stationary Target\",\"w\":\"multiplot\",\"d\":[{\"t\":\"Stationary\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Detection\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"cm\"},{\"t\":\"Energy\",\"a\":50,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"signal\",\"min\":0,\"max\":100}]},",
+  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"t\":\"%s\",\"g\":[{\"t\":\"Moving Target\",\"w\":\"multiplot\",\"d\":[{\"t\":\"Moving\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Detection\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Energy\",\"a\":50,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"signal\",\"min\":0,\"max\":100}]},{\"t\":\"Stationary Target\",\"w\":\"multiplot\",\"d\":[{\"t\":\"Stationary\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Detection\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Energy\",\"a\":50,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"signal\",\"min\":0,\"max\":100}]},",
     SNAME, radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
 
   for(int x = 0; x < LD2410_MAX_GATES; ++x) {
