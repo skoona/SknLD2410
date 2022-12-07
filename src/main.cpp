@@ -59,11 +59,10 @@ uint32_t lastReading = 0;
 uint32_t pos         = 0;
 uint32_t pos1        = 0;
 uint32_t pos2        = 0;
-uint16_t data_format = 0;
 
 bool sending_enabled = true;
-char buffer1[1024];
-char serialBuffer[5120];
+char buffer1[128];
+char serialBuffer[256];
 String command = "";
 String output = "";
 
@@ -79,12 +78,11 @@ String availableCommands() {
     sCmd += "\n\t( 5) readconfig: read the configuration from the sensor";
     sCmd += "\n\t( 6) enableengineeringmode: enable engineering mode";
     sCmd += "\n\t( 7) disableengineeringmode: disable engineering mode";
-    sCmd += "\n\t( 8) setreportingformat: change reporting data format (0,1,2)";
-    sCmd += "\n\t( 9) setmaxvalues <motion gate> <stationary gate> <inactivitytimer> (2-8) (0-65535)seconds";
-    sCmd += "\n\t(10) setsensitivity <gate> <motionsensitivity> <stationarysensitivity> (2-8|255) (0-100)";
-    sCmd += "\n\t(11) restart: restart the sensor";
-    sCmd += "\n\t(12) readversion: read firmware version";
-    sCmd += "\n\t(13) factoryreset: factory reset the sensor\n";    
+    sCmd += "\n\t( 8) setmaxvalues <motion gate> <stationary gate> <inactivitytimer> (2-8) (0-65535)seconds";
+    sCmd += "\n\t( 9) setsensitivity <gate> <motionsensitivity> <stationarysensitivity> (2-8|255) (0-100)";
+    sCmd += "\n\t(10) restart: restart the sensor";
+    sCmd += "\n\t(11) readversion: read firmware version";
+    sCmd += "\n\t(12) factoryreset: factory reset the sensor\n";    
 return sCmd;
 }
 
@@ -215,33 +213,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += "failed\n";
     }
   }
-  else if(cmdStr.startsWith("setreportingformat") || iCmd == 8) 
-  {
-    switch(data_format) {
-      case 1:
-        sBuf += "\nReporting Data Format WAS: Short JSON\n";
-        break;
-      case 2:
-        sBuf += "\nReporting Data Format WAS: Long JSON\n";
-        break;
-      default:
-        sBuf += "\nReporting Data Format WAS: CSV\n";
-    }
-    uint8_t firstSpace = cmdStr.indexOf(' ');
-    uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
-    data_format = (cmdStr.substring(firstSpace,secondSpace)).toInt();
-    switch(data_format) {
-      case 1:
-        sBuf += "\nReporting Data Format IS: Short JSON\n";
-        break;
-      case 2:
-        sBuf += "\nReporting Data Format IS: Long JSON\n";
-        break;
-      default:
-        sBuf += "\nReporting Data Format IS: CSV\n";
-    }
-  }  
-  else if(cmdStr.startsWith("setmaxvalues") || iCmd == 9) 
+  else if(cmdStr.startsWith("setmaxvalues") || iCmd == 8) 
   {
     uint8_t firstSpace = cmdStr.indexOf(' ');
     uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
@@ -278,7 +250,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += " stationary, try again\n";
     }
   }
-  else if(cmdStr.startsWith("setsensitivity") || iCmd == 10) 
+  else if(cmdStr.startsWith("setsensitivity") || iCmd == 9) 
   {
     uint8_t firstSpace = cmdStr.indexOf(' ');
     uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
@@ -319,7 +291,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += " dBZ, try again\n";
     }
   }
-  else if(cmdStr.equals("restart") || iCmd ==11) 
+  else if(cmdStr.equals("restart") || iCmd ==10) 
   {
     sBuf += "\nRestarting sensor: ";
     if(radar.requestRestart())
@@ -331,7 +303,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += "failed\n";
     }
   }
-  else if(cmdStr.equals("readversion") || iCmd == 12) 
+  else if(cmdStr.equals("readversion") || iCmd == 11) 
   {
     sBuf += "\nRequesting firmware version: ";
     if(radar.requestFirmwareVersion())
@@ -343,7 +315,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += "Failed\n";
     }
   }
-  else if(cmdStr.equals("factoryreset") || iCmd == 13) 
+  else if(cmdStr.equals("factoryreset") || iCmd == 12) 
   {
     sBuf += "\nFactory resetting sensor: ";
     if(radar.requestFactoryReset())
@@ -395,80 +367,6 @@ void sendToRequestor(String str, bool requestor = false) {
   // Serial.printf("DEBUG: SizeOf(serialBuffer)=%d Length(str)=%d Contents:%s", sizeof(serialBuffer), str.length(), str.c_str());
   udp.print(str);
   return udp.close();
-}
-
-/*
- * JSON Values for SerialStudio App - see test folder */
-String buildLongSerialStudioJSON() {
-  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"title\":\"%s\",\"groups\":[", SNAME);
-
-  pos1 = snprintf(buffer1,sizeof(buffer1),"{\"title\":\"Moving Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Moving\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"dBZ\",\"min\":0,\"max\":100}]},",
-     radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy());
-  strcat(serialBuffer, buffer1);
-  pos += pos1;
-
-  pos1 = snprintf(buffer1,sizeof(buffer1),"{\"title\":\"Stationary Target\",\"widget\":\"multiplot\",\"datasets\":[{\"title\":\"Stationary\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Detection\",\"alarm\":0,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"cm\"},{\"title\":\"Energy\",\"alarm\":50,\"led\":false,\"value\":%d,\"graph\":true,\"units\":\"dBZ\",\"min\":0,\"max\":100}]},",
-    radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
-  strcat(serialBuffer, buffer1);
-  pos += pos1;
-
-  for(int x = 0; x < LD2410_MAX_GATES; ++x) {
-    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"title\":\"Gate %d\",\"widget\":\"multiplot\",\"datasets\":", x);
-    strcat(serialBuffer, buffer1);
-    pos += pos1;
-
-    pos1 = snprintf(buffer1,sizeof(buffer1),"[{\"title\":\"Movement Energy\",\"alarm\":%d,\"value\":%d,\"graph\":true,\"units\":\"dBZ\",\"min\":0,\"max\":100,\"widget\":\"gauge\"},", 
-            radar.cfgMovingGateSensitivity(x), radar.engMovingDistanceGateEnergy(x)); 
-    strcat(serialBuffer, buffer1);
-    pos += pos1;
-
-    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"title\":\"Static Energy\",\"alarm\":%d,\"value\":%d,\"graph\":true,\"units\":\"dBZ\",\"min\":0,\"max\":100,\"widget\":\"gauge\"}]},", 
-             radar.cfgStationaryGateSensitivity(x), radar.engStaticDistanceGateEnergy(x));  
-    strcat(serialBuffer, buffer1);
-    pos += pos1;
-
-  }
-  serialBuffer[--pos] = 0;
-  strcat(serialBuffer, "]}*/\n");
-
-  return String(serialBuffer);
-}
-
-/*
- * JSON Values for SerialStudio App - see test folder */
-String buildShortSerialStudioJSON() {
-  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*{\"t\":\"%s\",\"g\":", SNAME);
-
-  pos1 = snprintf(buffer1,sizeof(buffer1),"[{\"t\":\"Moving Target\",\"w\":\"multiplot\",\"d\":[{\"t\":\"Moving\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Detection\",\"a\":0,\"l\":false,\"value\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Energy\",\"a\":50,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"dBZ\",\"min\":0,\"max\":100}]},",
-     radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy());
-  strcat(serialBuffer, buffer1);
-  pos += pos1;
-
-  pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Stationary Target\",\"w\":\"multiplot\",\"d\":[{\"t\":\"Stationary\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Detection\",\"a\":0,\"l\":false,\"v\":%d,\"g\":true,\"u\":\" cm\"},{\"t\":\"Energy\",\"a\":50,\"l\":false,\"v\":%d,\"g\":true,\"u\":\"dBZ\",\"min\":0,\"max\":100}]},",
-    radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
-  strcat(serialBuffer, buffer1);
-  pos += pos1;
-
-  for(int x = 0; x < LD2410_MAX_GATES; ++x) {
-    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Gate %d\",\"w\":\"multiplot\",\"d\":[", x);
-    strcat(serialBuffer, buffer1);
-    pos += pos1;
-
-    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Movement Energy\",\"a\":%d,\"v\":%d,\"g\":true,\"u\":\"dBZ\",\"min\":0,\"max\":100,\"w\":\"gauge\"},", 
-            radar.cfgMovingGateSensitivity(x), radar.engMovingDistanceGateEnergy(x)); 
-    strcat(serialBuffer, buffer1);
-    pos += pos1;
-
-    pos1 = snprintf(buffer1,sizeof(buffer1),"{\"t\":\"Static Energy\",\"a\":%d,\"v\":%d,\"g\":true,\"u\":\"dBZ\",\"min\":0,\"max\":100,\"w\":\"gauge\"}]},", 
-             radar.cfgStationaryGateSensitivity(x), radar.engStaticDistanceGateEnergy(x));  
-    strcat(serialBuffer, buffer1);
-    pos += pos1;
-
-  }
-  serialBuffer[--pos] = 0;
-  strcat(serialBuffer, "]}*/\n");
-
-  return String(serialBuffer);
 }
 
 /*
@@ -573,27 +471,20 @@ void loop()
     {
       lastReading = millis();   
       #ifdef SERIAL_STUDIO
-      switch(data_format) {
-        case 1:
-          sendToRequestor( buildShortSerialStudioJSON(), false );
-          break;
-        case 2:
-          sendToRequestor( buildLongSerialStudioJSON(), false );
-          break;
-        default:
-          sendToRequestor( buildWithAlarmSerialStudioCSV(), false );
-      }
+        sendToRequestor( buildWithAlarmSerialStudioCSV(), false );     
+      #else
+        if(Serial.available()) {
+          Serial.print(  buildWithAlarmSerialStudioCSV() );
+        }
       #endif
-
-      if(Serial.available()) {
-        Serial.print(  buildWithAlarmSerialStudioCSV() );
-      }
     }
   }
-  if(udpFlag && (command.length() > 1)) { // handle cb request
-    sendToRequestor(commandProcessor(command), true);
-    udpFlag=false;
-    command.clear();
-  }
+  #ifdef SERIAL_STUDIO
+    if(udpFlag && (command.length() > 1)) { // handle cb request
+      sendToRequestor(commandProcessor(command), true);
+      udpFlag=false;
+      command.clear();
+    }
+  #endif
   commandHandler();
 }

@@ -9,5 +9,4 @@ You will need the JSON project file in this folder and the app "SerialStudio" at
 - https://github.com/Serial-Studio/Serial-Studio/releases
 
 ### Both files are maps to process csv data: use via SerialStudio Setup option
-    ld2410-alarm.json      buildWithAlarmSerialStudioCSV()
-    ld2410-json.json       buildSerialStudioCSV()
+    ld2410-alarm-final.json      buildWithAlarmSerialStudioCSV()
