@@ -374,7 +374,7 @@ void sendToRequestor(String str, bool requestor = false) {
 //              %1,2,3, 4, 5,6,7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
 /*LD2410 Sensor 01,0,0,62,43,0,0,00,50,15, 0, 0,50,15, 0, 0,40, 5,40,62,30, 9,40,45,20, 3,30,25,15, 6,30,18,15, 1,20,10,15, 2,20, 8,15, 7,20, 6*/
 String buildWithAlarmSerialStudioCSV() {
-  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*%s,%d,%d,%d,%d,%d,%d,%d",SNAME,radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy(), radar.engRetainDataValue());
+  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*%s,%d,%d,%d,%d,%d,%d,%d,",SNAME,radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy(), radar.engRetainDataValue());
 
   for(int x = 0; x < LD2410_MAX_GATES; ++x) {
     pos1 = snprintf(buffer1,sizeof(buffer1),"%d,%d,%d,%d,",  radar.cfgMovingGateSensitivity(x), radar.engMovingDistanceGateEnergy(x), radar.cfgStationaryGateSensitivity(x), radar.engStaticDistanceGateEnergy(x));  
@@ -396,7 +396,7 @@ void setup(void)
   delay(250);
 
   // start path to LD2410
-  // radar.debug(Serial);
+  // radar.debug(Serial);  // enable debug output to console
   Serial2.begin (256000, SERIAL_8N1, RXD2, TXD2); //UART for monitoring the radar rx, tx
 
 #ifdef SERIAL_STUDIO
