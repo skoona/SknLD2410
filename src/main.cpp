@@ -67,18 +67,18 @@ String output = "";
 String availableCommands() {
     String sCmd = "";
     sCmd += "\nSupported commands:";
-    sCmd += "\n\t( 1) help: this text."; 
-    sCmd += "\n\t( 2) streamstart: start sending udp data to SerialStudio.";
-    sCmd += "\n\t( 3) streamstop: stop sending to SerialStream.";
-    sCmd += "\n\t( 4) read: read current values from the sensor";
-    sCmd += "\n\t( 5) readconfig: read the configuration from the sensor";
+    sCmd += "\n\t( 1) help:         this text."; 
+    sCmd += "\n\t( 2) streamstart:  start sending udp data to SerialStudio.";
+    sCmd += "\n\t( 3) streamstop:   stop sending to SerialStream.";
+    sCmd += "\n\t( 4) read:         read current values from the sensor";
+    sCmd += "\n\t( 5) readconfig:   read the configuration from the sensor";
     sCmd += "\n\t( 6) setmaxvalues <motion gate> <stationary gate> <inactivitytimer> (2-8) (0-65535)seconds";
     sCmd += "\n\t( 7) setsensitivity <gate> <motionsensitivity> <stationarysensitivity> (2-8|255) (0-100)";
-    sCmd += "\n\t( 8) restart: restart the sensor";
-    sCmd += "\n\t( 9) readversion: read firmware version";
+    sCmd += "\n\t( 8) restart:      restart the sensor";
+    sCmd += "\n\t( 9) readversion:  read firmware version";
     sCmd += "\n\t(10) factoryreset: factory reset the sensor";    
-    sCmd += "\n\t(11) deviceinfo: LD2410 device info";    
-    sCmd += "\n\t(12) reboot: reboot hosting micro-controller\n";    
+    sCmd += "\n\t(11) deviceinfo:   LD2410 device info";    
+    sCmd += "\n\t(12) reboot:       reboot hosting micro-controller\n";    
 
   return sCmd;
 }
