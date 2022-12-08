@@ -110,7 +110,7 @@
                     "graph": false,
                     "led": false,
                     "log": false,
-                    "max": 0,
+                    "max": 50000,
                     "min": 0,
                     "title": "Signal Level",
                     "units": "dBZ",
