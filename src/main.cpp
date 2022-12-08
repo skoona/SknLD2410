@@ -76,8 +76,11 @@ String availableCommands() {
     sCmd += "\n\t( 7) setsensitivity <gate> <motionsensitivity> <stationarysensitivity> (2-8|255) (0-100)";
     sCmd += "\n\t( 8) restart: restart the sensor";
     sCmd += "\n\t( 9) readversion: read firmware version";
-    sCmd += "\n\t(10) factoryreset: factory reset the sensor\n";    
-return sCmd;
+    sCmd += "\n\t(10) factoryreset: factory reset the sensor";    
+    sCmd += "\n\t(11) deviceinfo: LD2410 device info";    
+    sCmd += "\n\t(12) reboot: reboot hosting micro-controller\n";    
+
+  return sCmd;
 }
 
 /*
@@ -297,6 +300,25 @@ String commandProcessor(String &cmdStr) {
     {
       sBuf += "failed\n";
     }
+  }
+  else if(cmdStr.equals("deviceinfo") || iCmd == 11) 
+  {
+      sBuf += "\nLD2410 Device Information: \n";
+      radar.requestFirmwareVersion();
+
+      sBuf += "\tData reporting mode: ";
+      sBuf += (radar.isEngineeringMode() ? "Engineering Mode" : "Target Mode");
+      sBuf += "\n\tCommunication protocol version: v";
+      sBuf += radar.cmdProtocolVersion();
+      sBuf += ".0\n\tCommunications Buffer Size: ";
+      sBuf += radar.cmdCommunicationBufferSize();
+      sBuf += " bytes\n\tDevce firmare version: ";
+      sBuf += radar.cmdFirmwareVersion();
+      sBuf += "\n";
+  }
+  else if(cmdStr.equals("reboot") || iCmd == 12) 
+  {
+    ESP.restart();
   }
   else
   {
