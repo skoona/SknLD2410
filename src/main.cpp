@@ -312,8 +312,10 @@ String commandProcessor(String &cmdStr) {
       sBuf += radar.cmdProtocolVersion();
       sBuf += ".0\n\tCommunications Buffer Size: ";
       sBuf += radar.cmdCommunicationBufferSize();
-      sBuf += " bytes\n\tDevce firmare version: ";
+      sBuf += " bytes\n\tDevice firmare version: ";
       sBuf += radar.cmdFirmwareVersion();
+      sBuf += "\tEngineering retain data value: ";
+      sBuf += radar.engRetainDataValue();
       sBuf += "\n";
   }
   else if(cmdStr.equals("reboot") || iCmd == 12) 
@@ -369,10 +371,10 @@ void sendToRequestor(String str, bool requestor = false) {
 
 /*
  * CSV like Values for SerialStudio App - see test folder */
-//              %1,2,3, 4, 5,6,7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43
-/*LD2410 Sensor 01,0,0,62,43,0,0,50,15, 0, 0,50,15, 0, 0,40, 5,40,62,30, 9,40,45,20, 3,30,25,15, 6,30,18,15, 1,20,10,15, 2,20, 8,15, 7,20, 6*/
+//              %1,2,3, 4, 5,6,7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+/*LD2410 Sensor 01,0,0,62,43,0,0,00,50,15, 0, 0,50,15, 0, 0,40, 5,40,62,30, 9,40,45,20, 3,30,25,15, 6,30,18,15, 1,20,10,15, 2,20, 8,15, 7,20, 6*/
 String buildWithAlarmSerialStudioCSV() {
-  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*%s,%d,%d,%d,%d,%d,%d,",SNAME,radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy());
+  pos = snprintf(serialBuffer,sizeof(serialBuffer),"/*%s,%d,%d,%d,%d,%d,%d,%d",SNAME,radar.stationaryTargetDistance(),radar.detectionDistance(), radar.stationaryTargetEnergy(),radar.movingTargetDistance(), radar.detectionDistance(), radar.movingTargetEnergy(), radar.engRetainDataValue());
 
   for(int x = 0; x < LD2410_MAX_GATES; ++x) {
     pos1 = snprintf(buffer1,sizeof(buffer1),"%d,%d,%d,%d,",  radar.cfgMovingGateSensitivity(x), radar.engMovingDistanceGateEnergy(x), radar.cfgStationaryGateSensitivity(x), radar.engStaticDistanceGateEnergy(x));  

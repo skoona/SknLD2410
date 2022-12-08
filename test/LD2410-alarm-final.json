@@ -2,6 +2,8 @@
     "frameEnd": "*/",
     "frameParser": "/* \n * @brief Frame parsing function, you can modify this to suit your needs.\n * \n * By customizing this code, you can use a single JSON project file to \n * process different kinds of frames that are sent by the microcontroller \n * or any data source that is connected to Serial Studio. Frame parsing code\n * is specific to every JSON project that you create.\n *\n * @param frame      string with the latest received frame.\n * @param separator  data separator sequence defined by the JSON project.\n *\n * @note.            only data that is *inside* the data delimiters will\n *                   be processed by the frame parser.\n *\n * @note             you can safely declare global variables outside the\n *                   @c parse() function.\n */\nfunction parse(frame, separator) {\n    return frame.split(separator);\n}",
     "frameStart": "/*",
+    "separator": ",",
+    "title": "%1",
     "groups": [
         {
             "datasets": [
@@ -101,8 +103,27 @@
         },
         {
             "datasets": [
+                {                    
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "graph": false,
+                    "led": false,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Signal Level",
+                    "units": "dBZ",
+                    "value": "%8",
+                    "widget": "gauge"
+                }
+            ],
+            "title": "Engineering Retain",
+            "widget": "multiplot"
+        },
+        {
+            "datasets": [
                 {
-                    "alarm": "%8",
+                    "alarm": "%9",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -112,11 +133,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%9",
+                    "value": "%10",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%10",
+                    "alarm": "%11",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -126,7 +147,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%11",
+                    "value": "%12",
                     "widget": "gauge"
                 }
             ],
@@ -136,7 +157,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%12",
+                    "alarm": "%13",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -146,11 +167,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%13",
+                    "value": "%14",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%14",
+                    "alarm": "%15",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -160,7 +181,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%15",
+                    "value": "%16",
                     "widget": "gauge"
                 }
             ],
@@ -170,7 +191,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%16",
+                    "alarm": "%17",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -180,11 +201,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%17",
+                    "value": "%18",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%18",
+                    "alarm": "%19",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -194,7 +215,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%19",
+                    "value": "%20",
                     "widget": "gauge"
                 }
             ],
@@ -204,7 +225,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%20",
+                    "alarm": "%21",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -214,11 +235,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%21",
+                    "value": "%22",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%22",
+                    "alarm": "%23",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -228,7 +249,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%23",
+                    "value": "%24",
                     "widget": "gauge"
                 }
             ],
@@ -238,7 +259,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%24",
+                    "alarm": "%25",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -248,11 +269,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%25",
+                    "value": "%26",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%26",
+                    "alarm": "%27",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -262,7 +283,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%27",
+                    "value": "%28",
                     "widget": "gauge"
                 }
             ],
@@ -272,7 +293,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%28",
+                    "alarm": "%29",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -282,11 +303,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%29",
+                    "value": "%30",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%30",
+                    "alarm": "%31",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -296,7 +317,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%31",
+                    "value": "%32",
                     "widget": "gauge"
                 }
             ],
@@ -306,7 +327,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%32",
+                    "alarm": "%33",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -316,11 +337,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%33",
+                    "value": "%34",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%34",
+                    "alarm": "%35",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -330,7 +351,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%35",
+                    "value": "%36",
                     "widget": "gauge"
                 }
             ],
@@ -340,7 +361,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%36",
+                    "alarm": "%37",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -350,11 +371,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%37",
+                    "value": "%38",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%38",
+                    "alarm": "%39",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -364,7 +385,7 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%39",
+                    "value": "%40",
                     "widget": "gauge"
                 }
             ],
@@ -374,7 +395,7 @@
         {
             "datasets": [
                 {
-                    "alarm": "%40",
+                    "alarm": "%41",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -384,11 +405,11 @@
                     "min": 0,
                     "title": "Movement Energy",
                     "units": "dBZ",
-                    "value": "%41",
+                    "value": "%42",
                     "widget": "gauge"
                 },
                 {
-                    "alarm": "%42",
+                    "alarm": "%43",
                     "fft": false,
                     "fftSamples": 1024,
                     "graph": true,
@@ -398,14 +419,12 @@
                     "min": 0,
                     "title": "Static Energy",
                     "units": "dBZ",
-                    "value": "%43",
+                    "value": "%44",
                     "widget": "gauge"
                 }
             ],
             "title": "Gate 8",
             "widget": "multiplot"
         }
-    ],
-    "separator": ",",
-    "title": "%1"
+    ]
 }
