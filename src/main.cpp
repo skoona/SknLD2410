@@ -27,10 +27,6 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-
-#undef CONFIG_TCP_MSS
-#define CONFIG_TCP_MSS 5120
-
 #include <AsyncUDP.h>
 #include <ld2410.h>
 
@@ -76,13 +72,11 @@ String availableCommands() {
     sCmd += "\n\t( 3) streamstop: stop sending to SerialStream.";
     sCmd += "\n\t( 4) read: read current values from the sensor";
     sCmd += "\n\t( 5) readconfig: read the configuration from the sensor";
-    sCmd += "\n\t( 6) enableengineeringmode: enable engineering mode";
-    sCmd += "\n\t( 7) disableengineeringmode: disable engineering mode";
-    sCmd += "\n\t( 8) setmaxvalues <motion gate> <stationary gate> <inactivitytimer> (2-8) (0-65535)seconds";
-    sCmd += "\n\t( 9) setsensitivity <gate> <motionsensitivity> <stationarysensitivity> (2-8|255) (0-100)";
-    sCmd += "\n\t(10) restart: restart the sensor";
-    sCmd += "\n\t(11) readversion: read firmware version";
-    sCmd += "\n\t(12) factoryreset: factory reset the sensor\n";    
+    sCmd += "\n\t( 6) setmaxvalues <motion gate> <stationary gate> <inactivitytimer> (2-8) (0-65535)seconds";
+    sCmd += "\n\t( 7) setsensitivity <gate> <motionsensitivity> <stationarysensitivity> (2-8|255) (0-100)";
+    sCmd += "\n\t( 8) restart: restart the sensor";
+    sCmd += "\n\t( 9) readversion: read firmware version";
+    sCmd += "\n\t(10) factoryreset: factory reset the sensor\n";    
 return sCmd;
 }
 
@@ -101,7 +95,6 @@ String commandProcessor(String &cmdStr) {
   if(cmdStr.equals("help") || iCmd == 1) 
   {
     sBuf += availableCommands();
-    sBuf += "\n\n choose> ";
   }
   else if(cmdStr.equals("streamstart") || iCmd == 2)  
   {
@@ -189,31 +182,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += "Failed\n";
     }
   }
-  else if(cmdStr.equals("enableengineeringmode") || iCmd == 6) 
-  {
-    sBuf += "\nEnabling engineering mode: ";
-    if(radar.requestStartEngineeringMode())
-    {
-      sBuf += "OK\n";
-    }
-    else
-    {
-      sBuf += "failed\n";
-    }
-  }
-  else if(cmdStr.equals("disableengineeringmode") || iCmd == 7) 
-  {
-    sBuf += "\nDisabling engineering mode: ";
-    if(radar.requestEndEngineeringMode())
-    {
-      sBuf += "OK\n";
-    }
-    else
-    {
-      sBuf += "failed\n";
-    }
-  }
-  else if(cmdStr.startsWith("setmaxvalues") || iCmd == 8) 
+  else if(cmdStr.startsWith("setmaxvalues") || iCmd == 6) 
   {
     uint8_t firstSpace = cmdStr.indexOf(' ');
     uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
@@ -250,7 +219,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += " stationary, try again\n";
     }
   }
-  else if(cmdStr.startsWith("setsensitivity") || iCmd == 9) 
+  else if(cmdStr.startsWith("setsensitivity") || iCmd == 7) 
   {
     uint8_t firstSpace = cmdStr.indexOf(' ');
     uint8_t secondSpace = cmdStr.indexOf(' ',firstSpace + 1);
@@ -291,19 +260,21 @@ String commandProcessor(String &cmdStr) {
       sBuf += " dBZ, try again\n";
     }
   }
-  else if(cmdStr.equals("restart") || iCmd ==10) 
+  else if(cmdStr.equals("restart") || iCmd ==8) 
   {
-    sBuf += "\nRestarting sensor: ";
     if(radar.requestRestart())
     {
-      sBuf += "OK\n";
+      delay(1500);
+      if(radar.requestStartEngineeringMode()) {
+        sBuf += "\nRestarting sensor: OK\n";
+      }      
     }
     else
     {
-      sBuf += "failed\n";
+      sBuf += "\nRestarting sensor: failed\n";
     }
   }
-  else if(cmdStr.equals("readversion") || iCmd == 11) 
+  else if(cmdStr.equals("readversion") || iCmd == 9) 
   {
     sBuf += "\nRequesting firmware version: ";
     if(radar.requestFirmwareVersion())
@@ -315,7 +286,7 @@ String commandProcessor(String &cmdStr) {
       sBuf += "Failed\n";
     }
   }
-  else if(cmdStr.equals("factoryreset") || iCmd == 12) 
+  else if(cmdStr.equals("factoryreset") || iCmd == 10) 
   {
     sBuf += "\nFactory resetting sensor: ";
     if(radar.requestFactoryReset())
@@ -335,12 +306,15 @@ String commandProcessor(String &cmdStr) {
   }
 
   cmdStr.clear();
-  sBuf += "\n\n choose:> ";
+  sBuf += "\n choose:> ";
 
   return sBuf;
 }
 
-
+/*
+ * Accepts Serial chars and process chars as a command 
+ * when the newline char is received
+ */
 void commandHandler() {
   if(Serial.available())
   {
@@ -356,6 +330,7 @@ void commandHandler() {
   }
 }
 
+#ifdef SERIAL_STUDIO
 /*
  * Send data via UDP */
 void sendToRequestor(String str, bool requestor = false) {
@@ -368,6 +343,7 @@ void sendToRequestor(String str, bool requestor = false) {
   udp.print(str);
   return udp.close();
 }
+#endif
 
 /*
  * CSV like Values for SerialStudio App - see test folder */
@@ -459,7 +435,7 @@ void setup(void)
 
   Serial.println(F("setup() Complete..."));
   Serial.println( availableCommands() );
-  Serial.print("\n\n choose> ");
+  Serial.print("\n choose> ");
 }
 
 void loop()
