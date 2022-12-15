@@ -76,7 +76,33 @@ Reading configuration from sensor: OK
 Maximum gate ID: 8
 Maximum gate for moving targets: 8
 Maximum gate for stationary targets: 8
-Idle time for targets: 300s
+Idle time for targets: 5s
+Gate sensitivity
+Gate 0 moving targets: 50 dBZ stationary targets: 0 dBZ
+Gate 1 moving targets: 50 dBZ stationary targets: 0 dBZ
+Gate 2 moving targets: 40 dBZ stationary targets: 40 dBZ
+Gate 3 moving targets: 30 dBZ stationary targets: 40 dBZ
+Gate 4 moving targets: 20 dBZ stationary targets: 30 dBZ
+Gate 5 moving targets: 15 dBZ stationary targets: 30 dBZ
+Gate 6 moving targets: 15 dBZ stationary targets: 20 dBZ
+Gate 7 moving targets: 15 dBZ stationary targets: 20 dBZ
+Gate 8 moving targets: 15 dBZ stationary targets: 20 dBZ
+
+choose:> 6 8 8 600
+
+Setting max values to gate 8 moving targets, gate 8 stationary targets, 600s inactivity timer: OK, now restart to apply settings
+
+ choose:> 8
+
+Restarting sensor: OK
+
+ choose:> 5
+
+Reading configuration from sensor: OK
+Maximum gate ID: 8
+Maximum gate for moving targets: 8
+Maximum gate for stationary targets: 8
+Idle time for targets: 600s
 Gate sensitivity
 Gate 0 moving targets: 50 dBZ stationary targets: 0 dBZ
 Gate 1 moving targets: 50 dBZ stationary targets: 0 dBZ
@@ -108,4 +134,5 @@ provides the ability to configure the device to meet your objectives.
 
 ![](SerialStudio-Screenshot.png)
 
-
+After using this program to configure the device(s), it is assumed you would simply use the GPIO output which 
+goes High on detection of either a moving or stationary target.  The configured values will survive power cycles.
