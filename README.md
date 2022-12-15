@@ -103,7 +103,7 @@ LD2410 Device Information for Node: LD2410-Sensor-02
 ![](ld2410pinout.jpg)
 
 The test directory of this repo contains a JSON file formatted for the [SerialStudio application](https://github.com/Serial-Studio/Serial-Studio). 
-The provided ESP program and SerialStudio app provide deep understanding of the LD2410 operation, and 
+This ESP program and SerialStudio app provide deep understanding of the LD2410 operation, and 
 provides the ability to configure the device to meet your objectives.
 
 ![](SerialStudio-Screenshot.png)
