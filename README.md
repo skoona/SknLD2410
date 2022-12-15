@@ -19,7 +19,7 @@ documented in [SerialStudio's page](https://github.com/Serial-Studio/Serial-Stud
 WIFI_SSID and WIFI_PASS are double-quoted environment variables with related values, A strategy used 
 to avoid documenting WiFi credentials in the open.
 
--- examples: 
+### examples: 
 
     export PLATFORMIO_BUILD_FLAGS=-DWIFI_PASS='"ssid-password"' -DWIFI_SSID='"ssid-value"'
 
@@ -29,7 +29,7 @@ or
     export WIFI_SSID='"ssid-value"'
 
 
-Gates: 
+### Gates: 
 - each gate is 0.75m or 30 inches
  0 to 9 gates = 6.75m or 22 feet ish
 
@@ -37,7 +37,7 @@ Replace the IPAddress() values with IP Address of the machine running SerialStud
 
 ![](ld2410andbreakout.jpg)
 
-Serial Console Log or using UDP and netstat: "$ nc -u 10.100.1.244 8091"
+## Serial Console Log or using UDP and netstat: "$ nc -u 10.100.1.244 8091"
 ```
 .WiFi connected with IP: 10.100.1.244
 Client Listening on port: 8091
@@ -126,13 +126,28 @@ LD2410 Device Information for Node: LD2410-Sensor-02
  choose:> 
 ```
 
+## LD2410 Pinout
 ![](ld2410pinout.jpg)
 
 The test directory of this repo contains a JSON file formatted for the [SerialStudio application](https://github.com/Serial-Studio/Serial-Studio). 
 This ESP program and SerialStudio app provide deep understanding of the LD2410 operation, and 
 provides the ability to configure the device to meet your objectives.
 
+## SerialStudio
 ![](SerialStudio-Screenshot.png)
 
 After using this program to configure the device(s), it is assumed you would simply use the GPIO output which 
 goes High on detection of either a moving or stationary target.  The configured values will survive power cycles.
+
+## Contributing
+
+1. Fork it 
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+
+
+## License
+
+The project is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
