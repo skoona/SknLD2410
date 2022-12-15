@@ -30,8 +30,8 @@ or
 
 
 ### Gates: 
-- each gate is 0.75m or 30 inches
- 0 to 9 gates = 6.75m or 22 feet ish
+    each gate is 0.75m or 30 inches
+    0 to 9 gates = 6.75m or 22 feet ish
 
 Replace the IPAddress() values with IP Address of the machine running SerialStudio and deploy to ESP32. 
 
