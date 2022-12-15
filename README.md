@@ -20,8 +20,11 @@ WIFI_SSID and WIFI_PASS are double-quoted environment variables with related val
 to avoid documenting WiFi credentials in the open.
 
 -- examples: 
+
     export PLATFORMIO_BUILD_FLAGS=-DWIFI_PASS='"ssid-password"' -DWIFI_SSID='"ssid-value"'
+
 or 
+
     export WIFI_PASS='"ssid-password"'
     export WIFI_SSID='"ssid-value"'
 
