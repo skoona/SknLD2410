@@ -37,7 +37,7 @@ Replace the IPAddress() values with IP Address of the machine running SerialStud
 
 ![](ld2410andbreakout.jpg)
 
-Serial Console Log or "$ nc -u 10.100.1.244 8091"
+Serial Console Log or using UDP and netstat: "$ nc -u 10.100.1.244 8091"
 ```
 .WiFi connected with IP: 10.100.1.244
 Client Listening on port: 8091
