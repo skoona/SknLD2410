@@ -33,7 +33,7 @@
 #define RXD2 16 // 8
 #define TXD2 17 // 9
 #define MAX_COMMAND_TOKENS 32
-#define SNAME "LD2410 Sensor 02"
+#define SNAME "LD2410-Sensor-02"
 #define SERIAL_STUDIO 1
 #define PIN_GPIO  5 // D5
 #define LED_GPIO  2
@@ -66,6 +66,8 @@ char serialBuffer[256];
  * Available Commands */
 String availableCommands() {
     String sCmd = "";
+    sCmd += "\nNode: ";
+    sCmd += SNAME;
     sCmd += "\nSupported commands:";
     sCmd += "\n\t( 1) help:         this text."; 
     sCmd += "\n\t( 2) streamstart:  start sending udp data to SerialStudio.";
@@ -85,7 +87,7 @@ String availableCommands() {
 
 /*
  * Command Processor 
- * - there are two ommands not implemented
+ * - there are two commands not implemented here
  * - requestConfigurationModeBegin()
  * - requestConfigurationModeEnd()
  * Otherwise all commands are available as options
@@ -303,10 +305,11 @@ String commandProcessor(String &cmdStr) {
   }
   else if(cmdStr.equals("deviceinfo") || iCmd == 11) 
   {
-      sBuf += "\nLD2410 Device Information: \n";
+      sBuf += "\nLD2410 Device Information for Node: ";
+      sBuf += SNAME;
       radar.requestFirmwareVersion();
 
-      sBuf += "\tData reporting mode: ";
+      sBuf += "\n\tData reporting mode: ";
       sBuf += (radar.isEngineeringMode() ? "Engineering Mode" : "Target Mode");
       sBuf += "\n\tCommunication protocol version: v";
       sBuf += radar.cmdProtocolVersion();
