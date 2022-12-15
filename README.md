@@ -68,7 +68,7 @@ Moving target: 76 cm energy: 100 dBZ
  choose:> 4
 
 Reading from sensor: OK
-No Detection, in Idle Hold window of: 300 seconds
+No Detection, in Idle Hold window of: 5 seconds
 
  choose:> 5
 
