@@ -33,9 +33,72 @@ Gates:
 - each gate is 0.75m or 30 inches
  0 to 9 gates = 6.75m or 22 feet ish
 
-Replace the IPAddress() values with IP Address of the machine running SerialStudio and deploy to ESP32.
+Replace the IPAddress() values with IP Address of the machine running SerialStudio and deploy to ESP32. 
 
 ![](ld2410andbreakout.jpg)
+
+Console Log
+```
+.WiFi connected with IP: 10.100.1.244
+Client Listening on port: 8091
+Client Initialized...
+Sensor Initialized...
+setup() Complete...
+
+Supported commands:
+	( 1) help:         this text.
+	( 2) streamstart:  start sending udp data to SerialStudio.
+	( 3) streamstop:   stop sending to SerialStream.
+	( 4) read:         read current values from the sensor
+	( 5) readconfig:   read the configuration from the sensor
+	( 6) setmaxvalues <motion gate> <stationary gate> <inactivitytimer> (2-8) (0-65535)seconds
+	( 7) setsensitivity <gate> <motionsensitivity> <stationarysensitivity> (2-8|255) (0-100)
+	( 8) restart:      restart the sensor
+	( 9) readversion:  read firmware version
+	(10) factoryreset: factory reset the sensor
+	(11) deviceinfo:   LD2410 device info
+	(12) reboot:       reboot hosting micro-controller
+
+
+ choose> 4
+
+Reading from sensor: OK
+Moving target: 76 cm energy: 100 dBZ
+
+ choose:> 4
+
+Reading from sensor: OK
+No Detection, in Idle Hold window of: 300 seconds
+
+ choose:> 5
+
+Reading configuration from sensor: OK
+Maximum gate ID: 8
+Maximum gate for moving targets: 8
+Maximum gate for stationary targets: 8
+Idle time for targets: 300s
+Gate sensitivity
+Gate 0 moving targets: 50 dBZ stationary targets: 0 dBZ
+Gate 1 moving targets: 50 dBZ stationary targets: 0 dBZ
+Gate 2 moving targets: 40 dBZ stationary targets: 40 dBZ
+Gate 3 moving targets: 30 dBZ stationary targets: 40 dBZ
+Gate 4 moving targets: 20 dBZ stationary targets: 30 dBZ
+Gate 5 moving targets: 15 dBZ stationary targets: 30 dBZ
+Gate 6 moving targets: 15 dBZ stationary targets: 20 dBZ
+Gate 7 moving targets: 15 dBZ stationary targets: 20 dBZ
+Gate 8 moving targets: 15 dBZ stationary targets: 20 dBZ
+
+ choose:> 11
+
+LD2410 Device Information for Node: LD2410-Sensor-02
+	Data reporting mode: Engineering Mode
+	Communication protocol version: v1.0
+	Communications Buffer Size: 64 bytes
+	Device firmare version: v1.7.22091516
+	Engineering retain data value: 2051
+     
+ choose:> 
+```
 
 ![](ld2410pinout.jpg)
 
